@@ -38,7 +38,6 @@ class Groups {
                     await myConnection.query(sql, [data.groupsid, data.userid, data.storyid, data.name, data.stc, data.cates, data.days])
 
                     var resObj = {
-                        flags: flags,
                         dataSet: data
                     }
                     resolve(resObj)
@@ -49,7 +48,20 @@ class Groups {
             }
         )
     }
+    GetAllListOnStatus() {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
 
+                } catch (err) {
+                    
+                }
+            }
+        )
+    }   
+    GetAllListOffStatus() {
+
+    }
 }
 
 module.exports = new Groups();
