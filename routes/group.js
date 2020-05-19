@@ -19,10 +19,11 @@ router.post('/creategroup', async (req, res) => {
     try {
         // Check Who Request to Make Group Using Session.
         // Insert Userid into dataSet.
-        console.log(req.body)
+        // Request Santa Wallet Lock Up to Santa Wallet API
+
         var dataSet = new Object();
         dataSet = {
-            userid: 'test1@test.com',
+            userid: 'U2020053',
             storyid: 'a',
             groupsid: null,
             name: req.body.name,
@@ -30,6 +31,7 @@ router.post('/creategroup', async (req, res) => {
             cates: req.body.cates,
             days: req.body.days
         }
+        //After Receive Lock Up Complete Response
         await groupModel.CreateNewGroups(dataSet);
     } catch (err) {
         console.log(err)

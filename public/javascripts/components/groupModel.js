@@ -34,15 +34,25 @@ class Groups {
                     }
                     data.groupsid = code;
 
-                    var sql = 'INSERT INTO groups (groupsid, userid, storyid, name, stc, cates, days) VALUES (?, ?, ?, ?, ?, ?, ?)';
-                    await myConnection.query(sql, [data.groupsid, data.userid, data.storyid, data.name, data.stc, data.cates, data.days])
-
-                    var resObj = {
-                        dataSet: data
+                    await myConnection.query('INSERT INTO groups (groupsid, userid, storyid, name, stc, cates, days) VALUES (?, ?, ?, ?, ?, ?, ?)', [data.groupsid, data.userid, data.storyid, data.name, data.stc, data.cates, data.days])
+                    
+                    var rawReturn_2 = await myConnection.query('SELECT participantsid FROM participants');
+                    if (rawReturn_2[0][0] == undefined) {
+                        var code_2 = 'P' + ym + '1';
+                    } else {
+                        var len = rawReturn_2[0].length - 1;
+                        if (parseInt(rawReturn_2[0][len].groupsid.substring(1, 9)) == ym) {
+                            var code_2 = 'P' + ym + (parseInt(rawReturn_2[0][len].groupsid.substring(9)) + 1);
+                        } else {
+                            var code_2 = 'P' + ym + '1';
+                        }
                     }
-                    resolve(resObj)
+                    data.participantsid = code_2;
+                    await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid, days) VALUES (?, ?, ?, ?)',[data.participantsid, data.userid, data.groupsid, parseInt(data.days)])
+
+                    console.log(data)
+                    resolve(data)
                 } catch (err) {
-                    console.log(err)
                     reject(err)
                 }
             }
@@ -52,14 +62,14 @@ class Groups {
         return new Promise (
             async (resolve, reject) => {
                 try {
-
+                    
                 } catch (err) {
                     
                 }
             }
         )
     }   
-    GetAllListOffStatus() {
+    GetAllListOffStatus() {s
 
     }
 }
