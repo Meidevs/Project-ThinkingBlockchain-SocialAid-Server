@@ -7,8 +7,8 @@ var groupModel = require('../public/javascripts/components/groupModel.js');
 
 router.get('/grouplist', async (req, res) => {
     try {
-        await groupModel.GetAllListOnStatus();
-        res.status(200).send()
+        var resReturn = await groupModel.GetAllListOnStatus();
+        res.status(200).send(resReturn)
     } catch (err) {
         console.log(err);
         res.status(500).send(false)

@@ -41,8 +41,8 @@ class Groups {
                         var code_2 = 'P' + ym + '1';
                     } else {
                         var len = rawReturn_2[0].length - 1;
-                        if (parseInt(rawReturn_2[0][len].groupsid.substring(1, 9)) == ym) {
-                            var code_2 = 'P' + ym + (parseInt(rawReturn_2[0][len].groupsid.substring(9)) + 1);
+                        if (parseInt(rawReturn_2[0][len].participantsid.substring(1, 9)) == ym) {
+                            var code_2 = 'P' + ym + (parseInt(rawReturn_2[0][len].participantsid.substring(9)) + 1);
                         } else {
                             var code_2 = 'P' + ym + '1';
                         }
@@ -62,14 +62,15 @@ class Groups {
         return new Promise (
             async (resolve, reject) => {
                 try {
-                    
+                    var resReturn = await myConnection.query('SELECT * FROM groups WHERE status=0');
+                    resolve(resReturn[0]);
                 } catch (err) {
-                    
+                    reject(err)
                 }
             }
         )
     }   
-    GetAllListOffStatus() {s
+    GetAllListOffStatus() {
 
     }
 }
