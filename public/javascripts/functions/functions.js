@@ -29,13 +29,19 @@ class Functions {
                 try {
                     var date = new Date();
                     var a = date.getMonth() + 1;
-                    if(JSON.stringify(a).length != 2) {
+                    var b = date.getDate();
+                    if (JSON.stringify(a).length != 2) {
                         var monthCode = '0' + a;
                     } else {
                         var monthCode = JSON.stringify(a)
                     }
+                    if (JSON.stringify(b).length !=2) {
+                        var dayCode = '0' + b;
+                    } else {
+                        var dayCode = JSON.stringify(b)
+                    }
                     var yearCode = JSON.stringify(date.getFullYear());
-                    var returnData = yearCode + monthCode;
+                    var returnData = yearCode + monthCode + dayCode;
                     resolve(returnData)
                 } catch (err) {
                     console.log(err)

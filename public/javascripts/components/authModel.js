@@ -31,7 +31,7 @@ class User {
                         pin: data.pin,
                         wallet: data.wallet,
                     }
-                    
+
                     var flags = 0;
                     var allUsers = await this.SelectAll();
                     for (const content of allUsers[0]) {
@@ -47,13 +47,13 @@ class User {
                             var ym = await functions.DateCreator();
                             var rawReturn = await myConnection.query('SELECT userid FROM members');
                             if (rawReturn[0][0] == undefined) {
-                                var code = 'U' + ym + '1';
+                                var code = 'U' + ym.substring(0, 6) + '1';
                             } else {
                                 var len = rawReturn[0].length - 1;
-                                if (parseInt(rawReturn[0][len].userid.substring(1, 7)) == ym) {
-                                    var code = 'U' + ym + (parseInt(rawReturn[0][len].userid.substring(7)) + 1);
+                                if (parseInt(rawReturn[0][len].userid.substring(1, 7)) == ym.substring(0, 6)) {
+                                    var code = 'U' + ym.substring(0, 6) + (parseInt(rawReturn[0][len].userid.substring(7, 9)) + 1);
                                 } else {
-                                    var code = 'U' + ym + '1';
+                                    var code = 'U' + ym.substring(0, 6) + '1';
                                 }
                             }
                             rawObj.userid = code;
@@ -62,15 +62,15 @@ class User {
                             await myConnection.query(sql, [rawObj.userid, rawObj.email, rawObj.phonenumber, rawObj.name, rawObj.password, rawObj.pin, rawObj.wallet])
 
                             var resObj = {
-                                flags : flags,
-                                dataSet : rawObj
+                                flags: flags,
+                                dataSet: rawObj
                             }
                             resolve(resObj)
 
                         case 1:
                             var resObj = {
-                                flags : flags,
-                                dataSet : null,
+                                flags: flags,
+                                dataSet: null,
                             }
                             resolve(resObj)
                     }

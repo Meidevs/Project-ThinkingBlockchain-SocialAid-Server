@@ -13,6 +13,9 @@ router.get('/grouplist', async (req, res) => {
 
 router.post('/addgroup', async (req, res) => {
     try {
+        // Check Who Request to Make Group Using Session.
+        // Insert Userid into dataSet.
+        
 
     } catch (err) {
 
