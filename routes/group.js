@@ -7,7 +7,9 @@ var groupModel = require('../public/javascripts/components/groupModel.js');
 
 router.get('/grouplist', async (req, res) => {
     try {
+        // Ask Database to Gather Every Group Lists that Value of Status Column is Zero.
         var resReturn = await groupModel.GetAllListOnStatus();
+        console.log(resReturn)
         res.status(200).send(resReturn)
     } catch (err) {
         console.log(err);
