@@ -1,9 +1,24 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  
+// Main Page LatestGroup, Search Group, MyGroup
+
+router.get('/grouplist', async (req, res) => {
+    try {
+        
+    } catch (err) {
+
+    }
+})
+
+router.post('/addgroup', async (req, res) => {
+    try {
+
+    } catch (err) {
+
+    }
 });
+
+
 
 module.exports = router;
