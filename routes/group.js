@@ -3,6 +3,7 @@ var router = express.Router();
 
 var groupModel = require('../public/javascripts/components/groupModel.js');
 var authModel = require('../public/javascripts/components/authModel.js');
+var functions = require('../public/javascripts/functions/functions.js');
 
 // Main Page LatestGroup, Search Group, MyGroup
 
@@ -27,8 +28,8 @@ router.post('/creategroup', async (req, res) => {
         var storyid = await groupModel.CreateNewStoried(req.body.story);
 
         dataSet = {
-            userid: 'U20200525001',
-            catesid: 'C3',
+            userid: 'U20200525002',
+            catesid: 'C1',
             storyid: storyid,
             groupsid: null,
             name: req.body.name,
@@ -54,62 +55,34 @@ router.post('/search', async (req, res) => {
         var dataSet = new Object();
         var rawArray = new Array();
 
-        if (req.body.name) {
+        // Distinguish There are Catesid, Hostname, Groupname or Not
+        // 
+        if (req.body.name != null) {
+            console.log(req.body.name)
             reqCode = await authModel.GetMembersCode(req.body.name);
         } else {
             reqCode = null;
         }
 
-        if (req.body.catesid) {
-            reqCates = req.body.catesid
-        } else {
-            reqCates = null;
-        }
-
-        if (req.body.groupname) {
-            reqGroups = req.body.groupname
-        } else {
-            reqGroups = null;
-        }
+        reqCates = req.body.catesid;
+        reqGroups = req.body.groupname;
 
         dataSet = {
             catesid: reqCates,
-            name: reqCode,
-            groupname: reqGroups,
+            userid: reqCode,
+            groupname:reqGroups,
         }
 
-        // Get All GroupList
+        // Get All GroupList & Arrange Data into Array 
         var groupsList = await groupModel.GetAllStatusOn();
-
         for (let value of groupsList[0]) {
-            rawArray.push([value.groupsid, value.catesid, value.userid, value.groupname])
+            rawArray.push({groupsid : value.groupsid, catesid : value.catesid, userid : value.userid, groupname : value.groupname})
         }
-        for (var i = 0; i < rawArray.length; i++) {
-            if (rawArray[i][1] == dataSet.catesid) {
-                if (rawArray[i][2] == dataSet.name) {
-                    if (rawArray[i][3] == dataSet.groupname) {
-                        var groupsCode = rawArray[i][0];
-                    }
-                } else {
-                    if (rawArray[i][3] == dataSet.groupname) {
-                        var groupsCode = rawArray[i][0];
-                    }
-                }
-            } else {
-                if (rawArray[i][2] == dataSet.name) {
-                    if (rawArray[i][3] == dataSet.groupname) {
-                        var groupsCode = rawArray[i][0];
-                    }
-                } else {
-                    if (rawArray[i][3] == dataSet.groupname) {
-                        var groupsCode = rawArray[i][0];
-                    }
-                }
-            }
-        }
-        console.log('groupsCode', groupsCode)
 
-        var resReturn = await groupModel.GetGroupdatas(groupsCode)
+        // SearchBox Component receive rawArray Which Arranged to Make JSON Structure & dataSet Wich Act Like Filter is the Data From Front-End
+        var resSearch = await functions.SearchBox(rawArray, dataSet);
+        
+        var resReturn = await groupModel.GetGroupdatas(resSearch)
         res.status(200).send(resReturn)
     } catch (err) {
         console.log(err)

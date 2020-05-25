@@ -23,8 +23,8 @@ class Functions {
         )
     }
 
-    DateCreator () {
-        return new Promise (
+    DateCreator() {
+        return new Promise(
             async (resolve, reject) => {
                 try {
                     var date = new Date();
@@ -35,7 +35,7 @@ class Functions {
                     } else {
                         var monthCode = JSON.stringify(a)
                     }
-                    if (JSON.stringify(b).length !=2) {
+                    if (JSON.stringify(b).length != 2) {
                         var dayCode = '0' + b;
                     } else {
                         var dayCode = JSON.stringify(b)
@@ -45,6 +45,62 @@ class Functions {
                     resolve(returnData)
                 } catch (err) {
                     console.log(err)
+                    reject(err)
+                }
+            }
+        )
+    }
+
+    SearchBox(data, filter) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    console.log('data', data)
+                    console.log('filter', filter)
+                    var rawArray = new Array();
+                    var cnt = 0;
+
+                    for (var key in filter) {
+                        if (filter[key] != null) {
+                            cnt += 1;
+                        }
+                    }
+                    switch (cnt) {
+                        case 3:
+                            data.filter(item => {
+                                if (item.catesid == filter.catesid && item.userid == filter.userid && item.groupname == filter.groupname) {
+                                    rawArray.push(item.groupsid);
+                                }
+                            });
+                            break;
+                        case 2:
+                            var datas = data.filter(item => {
+                                if (item.catesid != filter.catesid && item.userid == filter.userid && item.groupname == filter.groupname) {
+                                    rawArray.push(item.groupsid);
+                                } else if (item.catesid == filter.catesid && item.userid != filter.userid && item.groupname == filter.groupname) {
+                                    rawArray.push(item.groupsid);
+                                } else if (item.catesid == filter.catesid && item.userid == filter.userid && item.groupname != filter.groupname) {
+                                    rawArray.push(item.groupsid);
+                                }
+                            });
+                            break;
+                        case 1:
+                            var datas = data.filter(item => {
+                                if (item.catesid == filter.catesid) {
+                                    rawArray.push(item.groupsid);
+                                } else if (item.userid == filter.userid) {
+                                    rawArray.push(item.groupsid);
+                                } else if (item.groupname == filter.groupname) {
+                                    rawArray.push(item.groupsid);
+                                }
+                            });
+                            break;
+                        default:
+                            break;
+                    }
+                    console.log(rawArray)
+                    resolve(rawArray)
+                } catch (err) {
                     reject(err)
                 }
             }

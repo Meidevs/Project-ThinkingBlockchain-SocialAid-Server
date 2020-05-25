@@ -73,11 +73,10 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-
                     var rawObj = new Object();
-
+                    var rawArray = new Array();
                     rawObj = {
-                        groupsid: data,
+                        groupsid: null,
                         host: null,
                         cates: null,
                         story: null,
@@ -85,20 +84,23 @@ class Groups {
                         stc: null,
                         period: null,
                     }
+                    for (var i = 0; i < data.length; i++) {
+                        var resReturn = await myConnection.query('SELECT * FROM groups WHERE groupsid = ?', [data]);
+                        var name = await userModel.GetName(resReturn[0][0].userid);
+                        var cates = await this.GetCates(resReturn[0][0].catesid);
+                        var story = await this.GetStories(resReturn[0][0].storyid);
+                        rawObj.groupsid = resReturn[0][0].groupsid;
+                        rawObj.host = name;
+                        rawObj.cates = cates;
+                        rawObj.story = story;
+                        rawObj.groupname = resReturn[0][0].groupname;
+                        rawObj.stc = resReturn[0][0].stc;
+                        rawObj.period = resReturn[0][0].period;
 
-                    var resReturn = await myConnection.query('SELECT * FROM groups WHERE groupsid = ?', [data]);
-                    var name = await userModel.GetName(resReturn[0][0].userid);
-                    var cates = await this.GetCates(resReturn[0][0].catesid);
-                    var story = await this.GetStories(resReturn[0][0].storyid);
+                        rawArray.push(JSON.parse(JSON.stringify(rawObj)))
+                    }
 
-                    rawObj.host = name;
-                    rawObj.cates = cates;
-                    rawObj.story = story;
-                    rawObj.groupname = resReturn[0][0].groupname;
-                    rawObj.stc = resReturn[0][0].stc;
-                    rawObj.period = resReturn[0][0].period;
-
-                    resolve(rawObj);
+                    resolve(rawArray);
                 } catch (err) {
                     reject(err)
                 }
@@ -175,7 +177,7 @@ class Groups {
                     for (var i = 0; i < resReturn[0].length; i++) {
                         var resultStory = await this.GetStories(resReturn[0][i].storyid)
                         var resultName = await userModel.GetName(resReturn[0][i].userid);
-                            rawObj.groupsid = resReturn[0][i].groupsid,
+                        rawObj.groupsid = resReturn[0][i].groupsid,
                             rawObj.groupname = resReturn[0][i].groupname,
                             rawObj.host = resultName,
                             rawObj.cates = resReturn[0][i].catesid,
