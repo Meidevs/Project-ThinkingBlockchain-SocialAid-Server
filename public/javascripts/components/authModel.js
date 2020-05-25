@@ -45,17 +45,10 @@ class User {
                         case 0:
                             // Create Date Based Number to Make userid
                             var ym = await functions.DateCreator();
-                            var rawReturn = await myConnection.query('SELECT userid FROM members');
-                            if (rawReturn[0][0] == undefined) {
-                                var code = 'U' + ym.substring(0, 6) + '1';
-                            } else {
-                                var len = rawReturn[0].length - 1;
-                                if (parseInt(rawReturn[0][len].userid.substring(1, 7)) == ym.substring(0, 6)) {
-                                    var code = 'U' + ym.substring(0, 6) + (parseInt(rawReturn[0][len].userid.substring(7, 9)) + 1);
-                                } else {
-                                    var code = 'U' + ym.substring(0, 6) + '1';
-                                }
-                            }
+                            var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,3,"0") AS cnt FROM members');
+
+                            var code = 'U' + ym + returnCount[0][0].cnt;
+
                             rawObj.userid = code;
 
                             var sql = 'INSERT INTO members (userid, email, phone, name, password, pin, wallet) VALUES (?, ?, ?, ?, ?, ?, ?)';
