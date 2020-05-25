@@ -2,6 +2,33 @@ var myConnection = require('../../../dbConfig.js');
 var functions = require('../functions/functions.js');
 
 class User {
+
+    GetMembersCode(data) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var rawReturn = await myConnection.query('SELECT userid FROM members WHERE name = ?', [data]);
+                    resolve(rawReturn[0][0].userid)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+
+    GetName(data) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var rawReturn = await myConnection.query('SELECT name FROM members WHERE userid = ?', [data]);
+                    resolve(rawReturn[0][0].name)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+    
     SelectAll() {
         return new Promise(
             async (resolve, reject) => {
@@ -75,8 +102,8 @@ class User {
         )
     }
 
-    Login (data) {
-        return new Promise (
+    Login(data) {
+        return new Promise(
             async (resolve, reject) => {
                 try {
                     // Check Non-Exist User, Password Mismatch, Login Complete.
@@ -85,22 +112,22 @@ class User {
 
                     var rawReturn = await myConnection.query('SELECT * FROM members WHERE email = ?', [data.email]);
                     if (rawReturn[0][0]) {
-                        rawReturn = await myConnection.query('SELECT * FROM members WHERE email = ? AND password = ?', [data.email, data.password] )
+                        rawReturn = await myConnection.query('SELECT * FROM members WHERE email = ? AND password = ?', [data.email, data.password])
                         if (rawReturn[0][0]) {
                             resObj = {
-                                flag : 0,
-                                dataSet : rawReturn[0]
+                                flag: 0,
+                                dataSet: rawReturn[0]
                             }
                         } else {
                             resObj = {
-                                flag : 2,
-                                dataSet : null,
+                                flag: 2,
+                                dataSet: null,
                             }
                         }
                     } else {
                         resObj = {
-                            flag : 1,
-                            dataSet : null,
+                            flag: 1,
+                            dataSet: null,
                         }
                     }
 
@@ -111,18 +138,7 @@ class User {
             }
         )
     }
-    GetMembersCode (data) { 
-        return new Promise (
-            async (resolve, reject) => {
-                try {
-                    var rawReturn = await myConnection.query('SELECT userid FROM members WHERE name = ?', [data]);
-                    resolve(rawReturn[0][0].userid)
-                } catch (err) {
-                    reject(err)
-                }
-            }
-        )
-    }
+
 }
 
 module.exports = new User;

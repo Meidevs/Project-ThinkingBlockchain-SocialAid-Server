@@ -1,5 +1,6 @@
 var myConnection = require('../../../dbConfig.js');
 var functions = require('../functions/functions.js');
+var userModel = require('../components/authModel.js');
 
 class Groups {
     SelectAll() {
@@ -17,8 +18,8 @@ class Groups {
         )
     }
 
-    GetAllStatusOn () {
-        return new Promise (
+    GetAllStatusOn() {
+        return new Promise(
             async (resolve, reject) => {
                 try {
                     var rawReturn = await myConnection.query('SELECT * FROM groups WHERE status=0');
@@ -29,13 +30,75 @@ class Groups {
             }
         )
     }
-    
-    GetAllStatusOff () {
-        return new Promise (
+
+    GetAllStatusOff() {
+        return new Promise(
             async (resolve, reject) => {
                 try {
                     var rawReturn = await myConnection.query('SELECT * FROM groups WHERE status=1');
                     resolve(rawReturn);
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+
+    GetStories(data) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var rawReturn = await myConnection.query('SELECT sentence FROM story WHERE storyid = ?', [data]);
+                    resolve(rawReturn[0][0].sentence)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+
+    GetCates(data) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var rawReturn = await myConnection.query('SELECT name FROM cates WHERE catesid = ?', [data]);
+                    resolve(rawReturn[0][0].name)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+    GetGroupdatas(data) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+
+                    var rawObj = new Object();
+
+                    rawObj = {
+                        groupsid: data,
+                        host: null,
+                        cates: null,
+                        story: null,
+                        groupname: null,
+                        stc: null,
+                        period: null,
+                    }
+
+                    var resReturn = await myConnection.query('SELECT * FROM groups WHERE groupsid = ?', [data]);
+                    var name = await userModel.GetName(resReturn[0][0].userid);
+                    var cates = await this.GetCates(resReturn[0][0].catesid);
+                    var story = await this.GetStories(resReturn[0][0].storyid);
+
+                    rawObj.host = name;
+                    rawObj.cates = cates;
+                    rawObj.story = story;
+                    rawObj.groupname = resReturn[0][0].groupname;
+                    rawObj.stc = resReturn[0][0].stc;
+                    rawObj.period = resReturn[0][0].period;
+
+                    resolve(rawObj);
                 } catch (err) {
                     reject(err)
                 }
@@ -101,28 +164,26 @@ class Groups {
                     rawObj = {
                         groupsid: null,
                         host: null,
-                        cates : null,
+                        cates: null,
                         story: null,
                         groupname: null,
                         stc: null,
                         period: null,
                     }
-                    
+
                     var resReturn = await this.GetAllStatusOn();
-                    console.log(resReturn[0])
                     for (var i = 0; i < resReturn[0].length; i++) {
-                        var resultStory = await myConnection.query('SELECT sentence FROM story WHERE storyid = ?', [resReturn[0][i].storyid])
-                        var resultName = await myConnection.query('SELECT name FROM members WHERE userid = ?', [resReturn[0][i].userid])
+                        var resultStory = await this.GetStories(resReturn[0][i].storyid)
+                        var resultName = await userModel.GetName(resReturn[0][i].userid);
+                            rawObj.groupsid = resReturn[0][i].groupsid,
+                            rawObj.groupname = resReturn[0][i].groupname,
+                            rawObj.host = resultName,
+                            rawObj.cates = resReturn[0][i].catesid,
+                            rawObj.story = resultStory,
+                            rawObj.stc = resReturn[0][i].stc,
+                            rawObj.period = resReturn[0][i].period,
 
-                        rawObj.groupsid = resReturn[0][i].groupsid,
-                        rawObj.groupname = resReturn[0][i].groupname,
-                        rawObj.host = resultName[0][0].name,
-                        rawObj.cates = resReturn[0][i].catesid,
-                        rawObj.story = resultStory[0][0].sentence,
-                        rawObj.stc = resReturn[0][i].stc,
-                        rawObj.period = resReturn[0][i].period,
-
-                        rawArray.push(JSON.parse(JSON.stringify(rawObj)))
+                            rawArray.push(JSON.parse(JSON.stringify(rawObj)))
                     }
 
                     resolve(rawArray);

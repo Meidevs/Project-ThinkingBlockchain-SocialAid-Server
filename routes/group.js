@@ -108,6 +108,9 @@ router.post('/search', async (req, res) => {
             }
         }
         console.log('groupsCode', groupsCode)
+
+        var resReturn = await groupModel.GetGroupdatas(groupsCode)
+        res.status(200).send(resReturn)
     } catch (err) {
         console.log(err)
         res.status(500).send(err)
