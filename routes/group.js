@@ -24,15 +24,19 @@ router.post('/creategroup', async (req, res) => {
         // Request Santa Wallet Lock Up to Santa Wallet API
 
         var dataSet = new Object();
+        await groupModel.CreateNewStoried(req.body.story);
+
         dataSet = {
-            userid: 'U2020053',
-            storyid: 'a',
+            userid: 'U2020051',
+            catesid : 'C3',
+            story: req.body.story,
             groupsid: null,
             name: req.body.name,
             stc: req.body.stc,
-            cates: req.body.cates,
-            days: req.body.days
+            period: req.body.period
         }
+
+
         //After Receive Lock Up Complete Response
         await groupModel.CreateNewGroups(dataSet);
     } catch (err) {

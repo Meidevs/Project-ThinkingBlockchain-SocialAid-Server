@@ -82,6 +82,43 @@ class User {
         )
     }
 
+    Login (data) {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    // Check Non-Exist User, Password Mismatch, Login Complete.
+                    var flags;
+                    var resObj = new Object();
+
+                    var rawReturn = await myConnection.query('SELECT * FROM members WHERE email = ?', [data.email]);
+                    if (rawReturn[0][0]) {
+                        rawReturn = await myConnection.query('SELECT * FROM members WHERE email = ? AND password = ?', [data.email, data.password] )
+                        if (rawReturn[0][0]) {
+                            resObj = {
+                                flag : 0,
+                                dataSet : rawReturn[0]
+                            }
+                        } else {
+                            resObj = {
+                                flag : 2,
+                                dataSet : null,
+                            }
+                        }
+                    } else {
+                        resObj = {
+                            flag : 1,
+                            dataSet : null,
+                        }
+                    }
+
+                    resolve(resObj);
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+
 }
 
 module.exports = new User;
