@@ -111,7 +111,18 @@ class User {
             }
         )
     }
-
+    GetMembersCode (data) { 
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    var rawReturn = await myConnection.query('SELECT userid FROM members WHERE name = ?', [data]);
+                    resolve(rawReturn[0][0].userid)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
 }
 
 module.exports = new User;
