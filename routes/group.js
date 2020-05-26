@@ -70,22 +70,63 @@ router.post('/search', async (req, res) => {
         dataSet = {
             catesid: reqCates,
             userid: reqCode,
-            groupname:reqGroups,
+            groupname: reqGroups,
         }
 
         // Get All GroupList & Arrange Data into Array 
         var groupsList = await groupModel.GetAllStatusOn();
         for (let value of groupsList[0]) {
-            rawArray.push({groupsid : value.groupsid, catesid : value.catesid, userid : value.userid, groupname : value.groupname})
+            rawArray.push({ groupsid: value.groupsid, catesid: value.catesid, userid: value.userid, groupname: value.groupname })
         }
 
         // SearchBox Component receive rawArray Which Arranged to Make JSON Structure & dataSet Wich Act Like Filter is the Data From Front-End
         var resSearch = await functions.SearchBox(rawArray, dataSet);
-        
+
         var resReturn = await groupModel.GetGroupdatas(resSearch)
         res.status(200).send(resReturn)
     } catch (err) {
         console.log(err)
+        res.status(500).send(err)
+    }
+});
+
+router.post('/loadgroup', async (req, res) => {
+    try {
+        var dataSet = new Object();
+        var flags;
+        var groupsid = [req.body.groupsid];
+
+        // Call User Session Data Using Session Storage
+        // var user = req.session.name;
+        var user = req.session.user.userid;
+        var userName = req.session.user.name;
+        // If value of Groups Table of userid Column is same as User in Session Storage, flags = 1;
+        // Get Participants From Participant Table & Check Whether User Aleady Joined or Not
+        // If userid Of User is in the Participants Table, flags = 2;
+        // If It isn't the Case above, flags = 0;
+
+        var returnExist = await groupModel.GetParticipantsList(groupsid, user)
+        var resReturn = await groupModel.GetGroupdatas(groupsid);
+        if (returnExist.empty == 1) {
+            if (resReturn.userid == user) {
+                flags = 1;
+            } else if (resReturn[0].host == userName) {
+                flags = 2;
+            }
+        } else {
+            flags = 0;
+        }
+        dataSet = {
+            host: resReturn[0].host,
+            cates: resReturn[0].cates,
+            story: resReturn[0].story,
+            groupname: resReturn[0].groupname,
+            stc: resReturn[0].stc,
+            period: resReturn[0].period,
+        }
+        res.status(200).send({flags : flags, resReturn : dataSet})
+    } catch (err) {
+        console.log(err);
         res.status(500).send(err)
     }
 });

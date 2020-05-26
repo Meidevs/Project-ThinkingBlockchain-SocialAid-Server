@@ -195,7 +195,33 @@ class Groups {
             }
         )
     }
-
+    GetParticipantsList(group, user) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var dataSet = new Object();
+                    dataSet = {
+                        empty: 0,
+                        participantsid: null,
+                        groupsid: null,
+                        userid: null,
+                    }
+                    var resReturn = await myConnection.query('SELECT * FROM participants WHERE userid = ? AND groupsid = ?', [user, group]);
+                    if (resReturn[0][0]) {
+                        dataSet = {
+                            empty: 1,
+                            participantsid: resReturn[0][0].participantsid,
+                            groupsid: resReturn[0][0].groupsid,
+                            userid: resReturn[0][0].userid,
+                        }
+                    } 
+                    resolve(dataSet)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
 }
 
 module.exports = new Groups();

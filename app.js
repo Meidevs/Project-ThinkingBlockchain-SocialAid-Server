@@ -2,6 +2,7 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 var logger = require('morgan');
 
 var groupRouter = require('./routes/group');
@@ -11,14 +12,14 @@ var app = express();
 
 // Sessions
 const session = require('express-session');
-// const FileStore = require('session-file-store');
+const FileStore = require('session-file-store')(session);
 
-// app.use(session({
-//   secret: 'keyboard cat',
-//   resave: false,
-//   saveUninitialized: true,
-//   store: new FileStore(),
-// }));
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true,
+  store: new FileStore(),
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

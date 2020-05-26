@@ -15,7 +15,12 @@ router.post('/login', async (req, res, next) => {
     resResult = await userModel.Login(dataSet);
 
     // Insert Session Storage, E-mail, Name, Userid, Phone
-
+    req.session.user = {
+      userid : resResult.dataSet.userid,
+      email : resResult.dataSet.email,
+      name : resResult.dataSet.name,
+      phone : resResult.dataSet.phone,
+    }
     res.status(200).send(resResult)
   } catch (err) {
     console.log(err)

@@ -116,7 +116,7 @@ class User {
                         if (rawReturn[0][0]) {
                             resObj = {
                                 flag: 0,
-                                dataSet: rawReturn[0]
+                                dataSet: rawReturn[0][0]
                             }
                         } else {
                             resObj = {
