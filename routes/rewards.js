@@ -29,7 +29,6 @@ router.get('/groupstatus', async (req, res) => {
         for (var i = 0; i < list[0].length; i++) {
             groupsidList.push(list[0][i].groupsid);
         }
-
         // Get All of STC From Groups Table & Sum All of STC.
         var stcReturn = await rewardsModel.GetAllSTC(groupsidList);
         var stcSum = stcReturn.reduce(function(preValue, currentValue) {
@@ -40,8 +39,22 @@ router.get('/groupstatus', async (req, res) => {
         var revSum = revReturn.reduce(function(preValue, currentValue) {
             return (preValue + currentValue)
         });
+
+        // Get Balance From Santa Wallet
+
+        // Get Profit Of Period From Rewards Table.
+        var reProfit = await rewardsModel.GetAllProfit(userid)
+        var repSum = reProfit.reduce(function(preValue, currentValue) {
+            return (preValue + currentValue)
+        });
+
+        // Get Repayment From Groups Table.
+        
+
         dataSet.totalSTC = stcSum;
         dataSet.revenue = revSum;
+        dataSet.profit = repSum;
+
         res.status(200).send(dataSet)
     } catch (err) {
         console.log(err)

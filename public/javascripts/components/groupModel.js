@@ -236,14 +236,14 @@ class Groups {
                         var resultStory = await this.GetStories(resReturn[0][i].storyid)
                         var resultName = await userModel.GetName(resReturn[0][i].userid);
                         rawObj.groupsid = resReturn[0][i].groupsid,
-                            rawObj.groupname = resReturn[0][i].groupname,
-                            rawObj.host = resultName,
-                            rawObj.cates = resReturn[0][i].catesid,
-                            rawObj.story = resultStory,
-                            rawObj.stc = resReturn[0][i].stc,
-                            rawObj.period = resReturn[0][i].period,
+                        rawObj.groupname = resReturn[0][i].groupname,
+                        rawObj.host = resultName,
+                        rawObj.cates = resReturn[0][i].catesid,
+                        rawObj.story = resultStory,
+                        rawObj.stc = resReturn[0][i].stc,
+                        rawObj.period = resReturn[0][i].period,
 
-                            rawArray.push(JSON.parse(JSON.stringify(rawObj)))
+                        rawArray.push(JSON.parse(JSON.stringify(rawObj)))
                     }
 
                     resolve(rawArray);
@@ -328,6 +328,18 @@ class Groups {
                 try {
                     var resReturn = await myConnection.query('SELECT * FROM participants WHERE userid = ?', [userid]);
                     resolve(resReturn)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+    GetParticipantsListOfDate (date) {
+        return new Promise (
+            async(resolve, reject) => {
+                try {
+                    var resReturn = await myConnection.query('SELECT * FROM participants WHERE duedate = ?', [date]);
+                    resolve(resReturn[0])
                 } catch (err) {
                     reject(err)
                 }
