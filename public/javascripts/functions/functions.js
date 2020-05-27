@@ -50,6 +50,40 @@ class Functions {
             }
         )
     }
+    RateDateMaker(data) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    // Error ? 발생가능성 높음
+                    var dataSet = new Object();
+                    var dateArray = new Array();
+                    var period = parseInt(data)
+                    var date = new Date();
+                    var year = date.getFullYear();
+                    var month = date.getMonth();
+                    var day = date.getDate();
+                    var dueDate = new Date(year, month, day + period + 1);
+                    for (var i = 1; i <= period; i++) {
+                        var daybyday = new Date(year, month, day + i)
+                        dateArray.push(daybyday.getFullYear() + '-' + (daybyday.getMonth() + 1) + '-' + daybyday.getDate());
+                    }
+                    // Shuffle datas in the DateArray.
+                    for (let x = dateArray.length - 1; x > 0; x--) {
+                        const y = Math.floor(Math.random() * (x + 1));
+                        [dateArray[x], dateArray[y]] = [dateArray[y], dateArray[x]];
+                    }
+                    dataSet = {
+                        dueDate: dueDate,
+                        dateArray: dateArray,
+                    }
+                    resolve(dataSet)
+                } catch (err) {
+                    console.log(err)
+                    reject(err)
+                }
+            }
+        )
+    }
 
     SearchBox(data, filter) {
         return new Promise(

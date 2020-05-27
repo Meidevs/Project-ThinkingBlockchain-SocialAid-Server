@@ -69,6 +69,8 @@ class Groups {
             }
         )
     }
+
+    // You can get All of Information of Group Tuple Only Using Groupsid.
     GetGroupdatas(data) {
         return new Promise(
             async (resolve, reject) => {
@@ -86,9 +88,16 @@ class Groups {
                     }
                     for (var i = 0; i < data.length; i++) {
                         var resReturn = await myConnection.query('SELECT * FROM groups WHERE groupsid = ?', [data]);
+
+                        // Get User's Name Using userid From memebers Table;
                         var name = await userModel.GetName(resReturn[0][0].userid);
+
+                        // Get Category's Name Using catesid From cates Table;
                         var cates = await this.GetCates(resReturn[0][0].catesid);
+
+                        // Get Sentence Using storyid From story Table;
                         var story = await this.GetStories(resReturn[0][0].storyid);
+
                         rawObj.groupsid = resReturn[0][0].groupsid;
                         rawObj.host = name;
                         rawObj.cates = cates;
@@ -101,6 +110,55 @@ class Groups {
                     }
 
                     resolve(rawArray);
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+    ChangeStatusDeprecated(groupsid) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    console.log(groupsid)
+                    await myConnection.query('UPDATE groups SET status=999 WHERE groupsid = ?', [groupsid]);
+                    resolve(true)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+    GetWalletList(groupsid) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var rawArray = new Array();
+
+                    var resReturn = await myConnection.query('SELECT * FROM participants WHERE groupsid = ?', [groupsid]);
+                    var userReturn = await myConnection.query('SELECT * FROM members');
+
+                    for (var i = 0; i < resReturn[0].length; i++) {
+                        for (var j = 0; j < userReturn[0].length; j++) {
+                            if (resReturn[0][i].userid == userReturn[0][j].userid) {
+                                rawArray.push({ userid: userReturn[0][j].userid, wallet: userReturn[0][j].wallet })
+                            }
+                        }
+                    }
+                    resolve(rawArray)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+
+    RemoveTupleParticipantsList(groupsid) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    await myConnection.query('UPDATE participants SET groupsid = "G999999", userid = "U999999" WHERE groupsid = ?', [groupsid]);
+                    resolve(true);
                 } catch (err) {
                     reject(err)
                 }
@@ -201,7 +259,7 @@ class Groups {
                 try {
                     var dataSet = new Object();
                     dataSet = {
-                        empty: 0,
+                        flags: 0,
                         participantsid: null,
                         groupsid: null,
                         userid: null,
@@ -209,14 +267,40 @@ class Groups {
                     var resReturn = await myConnection.query('SELECT * FROM participants WHERE userid = ? AND groupsid = ?', [user, group]);
                     if (resReturn[0][0]) {
                         dataSet = {
-                            empty: 1,
+                            flags: 1,
                             participantsid: resReturn[0][0].participantsid,
                             groupsid: resReturn[0][0].groupsid,
                             userid: resReturn[0][0].userid,
                         }
-                    } 
+                    }
                     resolve(dataSet)
                 } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+
+    ParticipantInGroup(groupsid, userid, totalParticipants) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var dateData = await functions.RateDateMaker(totalParticipants);
+                    var ym = await functions.DateCreator();
+                    var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,4,"0") AS cnt FROM participants');
+                    var resCount = await myConnection.query('SELECT COUNT(*) + 1 AS cnt FROM participants WHERE groupsid = ?', [groupsid]);
+                    var code = 'P' + ym + resReturn[0][0].cnt;
+                    await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid, count) VALUES (?, ?, ?, ?)', [code, userid, groupsid, resCount[0][0].cnt]);
+
+                    if (totalParticipants == resCount[0][0].cnt) {
+                        await myConnection.query('UPDATE groups SET status=1 WHERE groupsid = ?', [groupsid])
+                        for (var i = 1; i <= totalParticipants; i++) {
+                            await myConnection.query('UPDATE participants SET ratedate = ? WHERE count = ? AND groupsid = ?', [dateData.dateArray[i], i, groupsid])
+                        }
+                    }
+                    resolve(true)
+                } catch (err) {
+                    console.log(err)
                     reject(err)
                 }
             }
