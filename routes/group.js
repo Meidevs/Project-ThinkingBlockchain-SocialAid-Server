@@ -29,7 +29,7 @@ router.post('/creategroup', async (req, res) => {
 
         dataSet = {
             userid: req.session.user.userid,
-            catesid: 'C4',
+            catesid: 'C1',
             storyid: storyid,
             groupsid: null,
             name: req.body.name,

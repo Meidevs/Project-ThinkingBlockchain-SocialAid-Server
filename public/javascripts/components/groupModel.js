@@ -321,6 +321,19 @@ class Groups {
             }
         )
     }
+
+    GetAllJoinedList (userid) {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    var resReturn = await myConnection.query('SELECT * FROM participants WHERE userid = ?', [userid]);
+                    resolve(resReturn)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
 }
 
 module.exports = new Groups();
