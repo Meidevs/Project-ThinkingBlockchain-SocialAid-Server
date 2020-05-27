@@ -94,6 +94,18 @@ router.get('/groupstatus/detail', async (req, res) => {
                 }
             }
         }
+        
+        // HostArray :
+        // JoinArray : 
+        // Differentiate Waiting (status = 0), Ongoing (status = 1), Done (status = 2);
+
+        if (num = 0) {
+            await groupModel.GetGroupsListBasedOnStatus()
+        } else if (num = 1) {
+            await groupModel.GetGroupsListBasedOnStatus()
+        } else {
+            await groupModel.GetGroupsListBasedOnStatus()
+        }
 
         dataSet = {
             host: resReturn,
