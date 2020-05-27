@@ -62,7 +62,7 @@ class Functions {
                     var year = date.getFullYear();
                     var month = date.getMonth();
                     var day = date.getDate();
-                    var dueDate = new Date(year, month, day + period + 1);
+                    var dueDate = new Date(year, month, day + period);
                     for (var i = 1; i <= period; i++) {
                         var daybyday = new Date(year, month, day + i)
                         dateArray.push(daybyday.getFullYear() + '-' + (daybyday.getMonth() + 1) + '-' + daybyday.getDate());
@@ -132,7 +132,6 @@ class Functions {
                         default:
                             break;
                     }
-                    console.log(rawArray)
                     resolve(rawArray)
                 } catch (err) {
                     reject(err)

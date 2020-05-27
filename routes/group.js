@@ -29,7 +29,7 @@ router.post('/creategroup', async (req, res) => {
 
         dataSet = {
             userid: req.session.user.userid,
-            catesid: 'C3',
+            catesid: 'C4',
             storyid: storyid,
             groupsid: null,
             name: req.body.name,
@@ -79,7 +79,7 @@ router.post('/search', async (req, res) => {
             rawArray.push({ groupsid: value.groupsid, catesid: value.catesid, userid: value.userid, groupname: value.groupname })
         }
 
-        // SearchBox Component receive rawArray Which Arranged to Make JSON Structure & dataSet Wich Act Like Filter is the Data From Front-End
+        // SearchBox Component receive rawArray Which Arranged to Make JSON Structure & dataSet Which Act Like Filter is the Data From Front-End
         var resSearch = await functions.SearchBox(rawArray, dataSet);
 
         var resReturn = await groupModel.GetGroupdatas(resSearch)
@@ -99,8 +99,6 @@ router.post('/loadgroup', async (req, res) => {
         // Call User Session Data Using Session Storage
         var user = req.session.user.userid;
         var userName = req.session.user.name;
-        console.log('userid : ', user)
-        console.log('user name : ', userName)
 
         // If value of Groups Table of userid Column is same as User in Session Storage, flags = 1;
         // GetParticipantsList Function is to Get Participants From Participant Table & Check Whether User Aleady Joined or Not Using groupsid & userid;
@@ -112,8 +110,7 @@ router.post('/loadgroup', async (req, res) => {
 
         var returnExist = await groupModel.GetParticipantsList(groupsid, user);
         var resReturn = await groupModel.GetGroupdatas(groupsid);
-        console.log('returnExist : ', returnExist)
-        console.log('resReturn : ', resReturn)
+
         // "returExist.flags == 1" means that User Who wanna join the group had already participant in that group.
         // So, Server can get group data which User already participants in
         if (returnExist.flags == 1) {
@@ -149,9 +146,9 @@ router.post('/cancelgroup', async (req, res) => {
 
         //After Getting Unlock Process is Complete, Server will Ask Database to Change Status of Groups Table & Remove the Tuple From Participants Table .
         await groupModel.ChangeStatusDeprecated(groupsid);
-        var resReturn = await groupModel.RemoveTupleParticipantsList(groupsid);
+        await groupModel.RemoveTupleParticipantsList(groupsid);
         
-        // res.status(200).send(resReturn)
+        res.status(200).send(true)
     } catch (err) {
         console.log(err);
         res.status(500).send(err)
@@ -160,9 +157,13 @@ router.post('/cancelgroup', async (req, res) => {
 
 router.post('/canceljoin', async (req, res) => {
     try {
-
+        var groupsid = req.body.groupsid;
+        var userid = req.session.user.userid;
+        await groupModel.CancelJoin(groupsid, userid)
+        res.status(200).send(true);
     } catch (err) {
-
+        console.log(err)
+        res.status(500).send(err)
     }
 });
 
@@ -177,9 +178,11 @@ router.post('/joingroup', async (req, res) => {
         totalParticipants = period[0].period;
         console.log(totalParticipants)
         // To join the Group 
-        var resReturn = await groupModel.ParticipantInGroup(groupsid, userid, totalParticipants);
-
+        await groupModel.ParticipantInGroup(groupsid, userid, totalParticipants);
+        res.status(200).send(true);
     } catch (err) {
+        res.status(500).send(true)
+
     }
 });
 

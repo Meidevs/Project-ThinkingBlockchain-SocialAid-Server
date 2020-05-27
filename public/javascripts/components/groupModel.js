@@ -205,7 +205,7 @@ class Groups {
 
                     data.participantsid = code_2;
 
-                    await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid, count) VALUES (?, ?, ?, 1)', [data.participantsid, data.userid, data.groupsid])
+                    await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid) VALUES (?, ?, ?)', [data.participantsid, data.userid, data.groupsid])
 
                     resolve(data)
                 } catch (err) {
@@ -289,18 +289,33 @@ class Groups {
                     var ym = await functions.DateCreator();
                     var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,4,"0") AS cnt FROM participants');
                     var resCount = await myConnection.query('SELECT COUNT(*) + 1 AS cnt FROM participants WHERE groupsid = ?', [groupsid]);
+                    console.log( resCount[0][0].cnt)
                     var code = 'P' + ym + resReturn[0][0].cnt;
-                    await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid, count) VALUES (?, ?, ?, ?)', [code, userid, groupsid, resCount[0][0].cnt]);
+                    await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid) VALUES (?, ?, ?)', [code, userid, groupsid]);
 
                     if (totalParticipants == resCount[0][0].cnt) {
                         await myConnection.query('UPDATE groups SET status=1 WHERE groupsid = ?', [groupsid])
-                        for (var i = 1; i <= totalParticipants; i++) {
-                            await myConnection.query('UPDATE participants SET ratedate = ? WHERE count = ? AND groupsid = ?', [dateData.dateArray[i], i, groupsid])
+                        var partList = await myConnection.query('SELECT participantsid FROM participants WHERE groupsid = ?', [groupsid]);
+                        console.log(partList[0])
+                        for (var i = 0; i < totalParticipants; i++) {
+                            await myConnection.query('UPDATE participants SET ratedate = ?, duedate = ? WHERE participantsid = ? AND groupsid = ?', [dateData.dateArray[i], dateData.dueDate, partList[0][i].participantsid, groupsid])
                         }
                     }
                     resolve(true)
                 } catch (err) {
                     console.log(err)
+                    reject(err)
+                }
+            }
+        )
+    }
+    CancelJoin (groupsid, userid) {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    await myConnection.query('UPDATE participants SET groupsid = "G000000", userid="U000000" WHERE groupsid = ? AND userid = ?', [groupsid, userid]);
+                    resolve(0)
+                } catch (err) {
                     reject(err)
                 }
             }
