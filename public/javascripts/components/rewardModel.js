@@ -35,6 +35,7 @@ class Rewards {
                     }
                     resolve(rawArray)
                 } catch (err) {
+                    console.log(err)
                     reject(err)
                 }
             }
@@ -60,26 +61,46 @@ class Rewards {
                         }
                         await myConnection.query('UPDATE groups SET status = 2 WHERE groupsid = ?', [list[i].groupsid]);
                     }
-                    
+
                 } catch (err) {
                     console.log(err)
                 }
             }
         )
     }
-    GetAllProfit (userid) {
-        return new Promise (
+    GetAllProfit(userid) {
+        return new Promise(
             async (resolve, reject) => {
                 try {
                     var rawArray = new Array();
                     var resReturn = await myConnection.query('SELECT revenue FROM rewards WHERE userid = ?', [userid]);
 
-                    for (var i = 0; i < resReturn[0].length; i++ ) {
+                    for (var i = 0; i < resReturn[0].length; i++) {
                         rawArray.push(parseInt(resReturn[0][i].revenue))
                     }
                     resolve(rawArray);
                 } catch (err) {
-                    reject(err) 
+                    console.log(err)
+                    reject(err)
+                }
+            }
+        )
+    }
+    GetAllRepayment(list) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var rawArray = new Array();
+                    for (var i = 0; i < list.length; i++) {
+                        var resReturn = await myConnection.query('SELECT stc FROM groups WHERE groupsid = ? AND status = 2', [list[i]]);
+                        if (resReturn[0][0]) {
+                            rawArray.push(resReturn[0][0].stc);
+                        }
+                    }
+                    resolve(rawArray);
+                } catch (err) {
+                    console.log(err)
+                    reject(err)
                 }
             }
         )

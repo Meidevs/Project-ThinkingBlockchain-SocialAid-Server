@@ -236,14 +236,14 @@ class Groups {
                         var resultStory = await this.GetStories(resReturn[0][i].storyid)
                         var resultName = await userModel.GetName(resReturn[0][i].userid);
                         rawObj.groupsid = resReturn[0][i].groupsid,
-                        rawObj.groupname = resReturn[0][i].groupname,
-                        rawObj.host = resultName,
-                        rawObj.cates = resReturn[0][i].catesid,
-                        rawObj.story = resultStory,
-                        rawObj.stc = resReturn[0][i].stc,
-                        rawObj.period = resReturn[0][i].period,
+                            rawObj.groupname = resReturn[0][i].groupname,
+                            rawObj.host = resultName,
+                            rawObj.cates = resReturn[0][i].catesid,
+                            rawObj.story = resultStory,
+                            rawObj.stc = resReturn[0][i].stc,
+                            rawObj.period = resReturn[0][i].period,
 
-                        rawArray.push(JSON.parse(JSON.stringify(rawObj)))
+                            rawArray.push(JSON.parse(JSON.stringify(rawObj)))
                     }
 
                     resolve(rawArray);
@@ -289,7 +289,7 @@ class Groups {
                     var ym = await functions.DateCreator();
                     var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,4,"0") AS cnt FROM participants');
                     var resCount = await myConnection.query('SELECT COUNT(*) + 1 AS cnt FROM participants WHERE groupsid = ?', [groupsid]);
-                    console.log( resCount[0][0].cnt)
+                    console.log(resCount[0][0].cnt)
                     var code = 'P' + ym + resReturn[0][0].cnt;
                     await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid) VALUES (?, ?, ?)', [code, userid, groupsid]);
 
@@ -309,8 +309,8 @@ class Groups {
             }
         )
     }
-    CancelJoin (groupsid, userid) {
-        return new Promise (
+    CancelJoin(groupsid, userid) {
+        return new Promise(
             async (resolve, reject) => {
                 try {
                     await myConnection.query('UPDATE participants SET groupsid = "G000000", userid="U000000" WHERE groupsid = ? AND userid = ?', [groupsid, userid]);
@@ -322,8 +322,8 @@ class Groups {
         )
     }
 
-    GetAllJoinedList (userid) {
-        return new Promise (
+    GetAllJoinedList(userid) {
+        return new Promise(
             async (resolve, reject) => {
                 try {
                     var resReturn = await myConnection.query('SELECT * FROM participants WHERE userid = ?', [userid]);
@@ -334,13 +334,32 @@ class Groups {
             }
         )
     }
-    GetParticipantsListOfDate (date) {
-        return new Promise (
-            async(resolve, reject) => {
+    GetParticipantsListOfDate(date) {
+        return new Promise(
+            async (resolve, reject) => {
                 try {
                     var resReturn = await myConnection.query('SELECT * FROM participants WHERE duedate = ?', [date]);
                     resolve(resReturn[0])
                 } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+    GetHostGroupList(list) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var rawArray = new Array();
+                    for (var i = 0; i < list.length; i++) {
+                        var resReturn = await myConnection.query('SELECT userid FROM groups WHERE groupsid = ?',[list[i].groupsid]);
+                        if (resReturn[0][0] && resReturn[0][0].userid == list[i].userid) {
+                            rawArray.push(list[i].groupsid)
+                        }
+                    }
+                    resolve(rawArray);
+                } catch (err) {
+                    console.log(err)
                     reject(err)
                 }
             }
