@@ -122,7 +122,7 @@ router.get('/groupstatus/detail/:id', async (req, res) => {
 
         // Get Groupsid Which created by Self
         var hostArray = await groupModel.GetHostGroupList(list[0]);
-        console.log(hostArray)
+
         // Differentiate between Self-Made and Non-Made Groupsid
         for (var x = 0; x < rawArray.length; x++) {
             for (var y = 0; y < hostArray.length; y++) {
@@ -131,8 +131,6 @@ router.get('/groupstatus/detail/:id', async (req, res) => {
                 }
             }
         }
-        console.log(joinArray)
-
         // HostArray :
         // JoinArray : 
         // Differentiate Waiting (status = 0), Ongoing (status = 1), Done (status = 2);

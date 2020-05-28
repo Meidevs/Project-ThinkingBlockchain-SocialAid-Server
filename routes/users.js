@@ -60,4 +60,12 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
+router.post('/myinfo', async (req, res) => {
+  try {
+    
+  } catch (err) {
+
+  }
+})
+
 module.exports = router;

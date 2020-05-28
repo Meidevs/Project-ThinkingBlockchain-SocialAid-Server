@@ -38,6 +38,8 @@ cron.schedule("00 00 * * *", async () => {
       rewardsArray.push(rawObj)
     }
 
+    // Transfer Wallet List to Santa.  
+
     await rewardsModel.InsertRewards(rewardsArray);
   } catch (err) {
     console.log(err)

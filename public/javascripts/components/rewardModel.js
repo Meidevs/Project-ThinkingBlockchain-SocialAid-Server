@@ -105,13 +105,29 @@ class Rewards {
             }
         )
     }
-    DateRewards (userid) {
-        return new Promise (
+    DateRewards(userid) {
+        return new Promise(
             async (resolve, reject) => {
                 try {
                     console.log(userid)
                     var dateMoney = await myConnection.query('SELECT year(date) AS annually, month(date) AS monthly, SUM(revenue) AS total FROM rewards WHERE userid = ? GROUP BY YEAR(date), MONTH(date) ', [userid]);
                     resolve(dateMoney[0])
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+    GetWalletList(list) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var rawArray = new Array();
+                    for (var i = 0; i < list.length; i++) {
+                        var resReturn = await myConnection.query('SELECT wallet, pin FROM members WHERE userid=?', [list[i]]);
+                        rawArray.push(resReturn[0])
+                    }
+                    resolve(rawArray);
                 } catch (err) {
                     reject(err)
                 }
