@@ -50,7 +50,7 @@ router.post('/setalarm', async (req, res) => {
         } else {
             await alarmModel.UpdateAlarm(userid, cateid, hostid, stc);
         }
-        res.status(200).send(resReturn)
+        res.status(200).send(true)
     } catch (err) {
         console.log(err);
         res.status(500).send(false)

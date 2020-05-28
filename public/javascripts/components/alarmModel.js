@@ -44,6 +44,18 @@ class Alarm {
             }
         )
     }
+    ChangeAlarmStatus (catesid, hostid, stc) {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    await myConnection.query('UPDATE alarm SET status=1 WHERE catesid = ? AND hostid = ? AND stc = ?', [catesid, hostid, stc]);
+                    resolve(true)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
 }
 
 module.exports = new Alarm();

@@ -3,6 +3,7 @@ var router = express.Router();
 
 var groupModel = require('../public/javascripts/components/groupModel.js');
 var authModel = require('../public/javascripts/components/authModel.js');
+var alarmModel = require('../public/javascripts/components/alarmModel.js');
 var functions = require('../public/javascripts/functions/functions.js');
 
 // Main Page LatestGroup, Search Group, MyGroup
@@ -29,16 +30,19 @@ router.post('/creategroup', async (req, res) => {
 
         dataSet = {
             userid: req.session.user.userid,
-            catesid: 'C1',
+            catesid: req.body.catesid,
             storyid: storyid,
             groupsid: null,
             name: req.body.name,
             stc: req.body.stc,
             period: req.body.period
         }
-
         //After Receive Lock Up Complete Response
         await groupModel.CreateNewGroups(dataSet);
+
+        // Alarm
+        await alarmModel.ChangeAlarmStatus(dataSet.catesid, dataSet.userid, dataSet.stc);
+
         res.status(200).send(true)
     } catch (err) {
         console.log(err)
