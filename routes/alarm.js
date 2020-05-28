@@ -4,10 +4,10 @@ var router = express.Router();
 var groupModel = require('../public/javascripts/components/groupModel.js');
 var authModel = require('../public/javascripts/components/authModel.js');
 var functions = require('../public/javascripts/functions/functions.js');
+var alarmModel = require('../public/javascripts/components/alarmModel.js');
 
 router.post('/hostname', async (req, res) => {
     try {
-        console.log(req.body.username)
         var username = req.body.username;
         var rawArray = new Array();
         var resArray = new Array();
@@ -15,7 +15,6 @@ router.post('/hostname', async (req, res) => {
         for (let value of resReturn[0]) {
             rawArray.push([value.userid, value.name])
         }
-        console.log(rawArray)
         for (var i = 0; i < rawArray.length; i++) {
             var rawObj = new Object();
 
@@ -36,8 +35,21 @@ router.post('/hostname', async (req, res) => {
 
 router.post('/setalarm', async (req, res) => {
     try {
+        var userid = req.session.user.userid;
+        var cateid= req.body.catesid;
+        var hostid = req.body.hostid;
+        var stc = req.body.stc;
+        var rawArray = new Array();
+        var resReturn =  await alarmModel.SelectAll();
+        for (var i = 0; i <  resReturn[0].length; i++) {
+            rawArray.push(resReturn[0][i].userid);
+        }
         
-        await alarmModel.SetAlarm();
+        if ( rawArray.indexOf(userid) == -1 ) {
+            await alarmModel.SetNewAlarm(userid, cateid, hostid, stc);
+        } else {
+            await alarmModel.UpdateAlarm(userid, cateid, hostid, stc);
+        }
         res.status(200).send(resReturn)
     } catch (err) {
         console.log(err);
