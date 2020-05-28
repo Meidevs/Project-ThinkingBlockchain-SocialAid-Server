@@ -9,6 +9,7 @@ var functions = require('../public/javascripts/functions/functions.js');
 router.get('/groupstatus', async (req, res) => {
     try {
         var groupsidList = new Array();
+        var rawArray = new Array();
         var dataSet = new Object();
 
         // Transfer Total STC, Revenue, Balance, Profit, Repayment, Groups Count, Total STC Annually & Monthly
@@ -58,11 +59,45 @@ router.get('/groupstatus', async (req, res) => {
         var cntReturn = await groupModel.GetAllJoinedList(userid);
         cnt = cntReturn[0].length;
 
+        // Get Monthly Reward Data
+        var mReturn = await rewardsModel.DateRewards(userid);
+        for (var i = 0; i < mReturn.length; i++) {
+            rawArray.push(mReturn[i].annually);
+        }
+        var rawArray = rawArray.filter((item, index) => rawArray.indexOf(item) == index);
+
+        var yearArray = new Array();
+        var monthArray = new Array();
+
+        for (var x = 0; x < rawArray.length; x++) {
+            var insObj = new Object();
+            var insObj_2 = new Object();
+            var sum = 0;
+            insObj = {
+                year: rawArray[x],
+                total: null,
+            }
+            insObj_2 = {
+                year: rawArray[x],
+                month: null,
+                total: null,
+            }
+            for (var i = 0; i < mReturn.length; i++) {
+                if (rawArray[x] == mReturn[i].annually) {
+                    sum += mReturn[i].total;
+                }
+            }
+            insObj.total = sum;
+            yearArray.push(insObj);
+        }
+
         dataSet.totalSTC = stcSum;
         dataSet.revenue = revSum;
         dataSet.profit = repSum;
         dataSet.repayment = repaSum;
         dataSet.count = cnt;
+        dataSet.annually = yearArray;
+        dataSet.monthly = mReturn;
         res.status(200).send(dataSet)
     } catch (err) {
         console.log(err)
@@ -94,7 +129,7 @@ router.get('/groupstatus/detail', async (req, res) => {
                 }
             }
         }
-        
+
         // HostArray :
         // JoinArray : 
         // Differentiate Waiting (status = 0), Ongoing (status = 1), Done (status = 2);

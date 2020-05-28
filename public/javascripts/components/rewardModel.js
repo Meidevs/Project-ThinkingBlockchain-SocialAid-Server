@@ -105,6 +105,19 @@ class Rewards {
             }
         )
     }
+    DateRewards (userid) {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    console.log(userid)
+                    var dateMoney = await myConnection.query('SELECT year(date) AS annually, month(date) AS monthly, SUM(revenue) AS total FROM rewards WHERE userid = ? GROUP BY YEAR(date), MONTH(date) ', [userid]);
+                    resolve(dateMoney[0])
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
 }
 
 module.exports = new Rewards();
