@@ -2,7 +2,6 @@ var myConnection = require('../../../dbConfig.js');
 var functions = require('../functions/functions.js');
 
 class User {
-
     GetMembersCode(data) {
         return new Promise(
             async (resolve, reject) => {
@@ -15,7 +14,7 @@ class User {
             }
         )
     }
-
+    
     GetName(data) {
         return new Promise(
             async (resolve, reject) => {

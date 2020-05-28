@@ -9,6 +9,7 @@ var logger = require('morgan');
 var groupRouter = require('./routes/group');
 var usersRouter = require('./routes/users');
 var rewardsRouter = require('./routes/rewards');
+var alarmRouter = require('./routes/alarm');
 
 var cron = require('./routes/schedule');
 
@@ -36,6 +37,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api', groupRouter);
+app.use('/api/alarm', alarmRouter);
 app.use('/api/rewards', rewardsRouter);
 app.use('/api/users', usersRouter);
 // app.use(cron);
