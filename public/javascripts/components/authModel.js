@@ -129,7 +129,6 @@ class User {
                             dataSet: null,
                         }
                     }
-
                     resolve(resObj);
                 } catch (err) {
                     reject(err)

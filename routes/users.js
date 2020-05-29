@@ -4,7 +4,6 @@ var functions = require('../public/javascripts/functions/functions.js')
 var userModel = require('../public/javascripts/components/authModel.js');
 
 router.post('/login', async (req, res, next) => {
-
   try {
     // Get E-mail, password From Front-End
     var dataSet = new Object();
@@ -23,10 +22,7 @@ router.post('/login', async (req, res, next) => {
     }
     res.status(200).send(resResult)
   } catch (err) {
-    console.log(err)
-    res.status(500).send({
-      Err : '에러!!'
-    })
+    res.status(500).send(resResult)
   }
 });
 
