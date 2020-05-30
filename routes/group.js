@@ -17,6 +17,15 @@ router.get('/grouplist', async (req, res) => {
         console.log(err);
         res.status(500).send(false)
     }
+});
+
+router.get('/getcates', async (req, res) => {
+    try {
+        var catesList = await groupModel.GetAllCates();
+        res.status(200).send(catesList)
+    } catch (err) {
+        res.status(500).send(err)
+    }
 })
 
 router.post('/creategroup', async (req, res) => {
@@ -98,7 +107,7 @@ router.post('/loadgroup', async (req, res) => {
         var dataSet = new Object();
         var flags;
         var groupsid = [req.body.groupsid];
-        console.log(groupsid)
+
         // Call User Session Data Using Session Storage
         var user = req.session.user.userid;
         var userName = req.session.user.name;
@@ -110,7 +119,7 @@ router.post('/loadgroup', async (req, res) => {
         // "flags = 0" : Not join
         // "flags = 1" : Owner of Group
         // "flags = 2" : Already Join the Group
-
+        var reCount = await groupModel.GetParticipantsCount(groupsid);
         var returnExist = await groupModel.GetParticipantsList(groupsid, user);
         var resReturn = await groupModel.GetGroupdatas(groupsid);
 
@@ -129,7 +138,18 @@ router.post('/loadgroup', async (req, res) => {
         // 1. Group Cancel : 
         // 2. Cancel Join :
         // 3. Join Group : 
-        res.status(200).send({flags : flags})
+        res.status(200).send({
+            flags : flags,
+            groupsid : resReturn[0].groupsid,
+            host : resReturn[0].host,
+            cates : resReturn[0].cates,
+            story : resReturn[0].story,
+            groupname : resReturn[0].groupname,
+            stc : resReturn[0].stc,
+            period : resReturn[0].period,
+            stc : resReturn[0].stc,
+            participants : reCount
+        })
     } catch (err) {
         console.log(err);
         res.status(500).send(err)
@@ -174,8 +194,7 @@ router.post('/joingroup', async (req, res) => {
     try {
         //
         var userid = req.session.user.userid;
-        var groupsid = req.body.groupsid;
-
+        var groupsid = [req.body.groupsid];
         var period = await groupModel.GetGroupdatas(groupsid);
 
         totalParticipants = period[0].period;

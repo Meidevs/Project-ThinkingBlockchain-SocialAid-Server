@@ -56,7 +56,18 @@ class Groups {
             }
         )
     }
-
+    GetAllCates() {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var resReturn = await myConnection.query('SELECT catesid, name FROM cates');
+                    resolve(resReturn[0])
+                } catch (err) {
+                    reject * (err)
+                }
+            }
+        )
+    }
     GetCates(data) {
         return new Promise(
             async (resolve, reject) => {
@@ -77,6 +88,7 @@ class Groups {
                 try {
                     var rawObj = new Object();
                     var rawArray = new Array();
+
                     rawObj = {
                         groupsid: null,
                         host: null,
@@ -86,7 +98,7 @@ class Groups {
                         stc: null,
                         period: null,
                     }
-                    console.log(data[0])
+                    
                     for (var i = 0; i < data.length; i++) {
                         var resReturn = await myConnection.query('SELECT * FROM groups WHERE groupsid = ?', [data[i]]);
 
@@ -350,7 +362,7 @@ class Groups {
                 try {
                     var rawArray = new Array();
                     for (var i = 0; i < list.length; i++) {
-                        var resReturn = await myConnection.query('SELECT userid FROM groups WHERE groupsid = ?',[list[i].groupsid]);
+                        var resReturn = await myConnection.query('SELECT userid FROM groups WHERE groupsid = ?', [list[i].groupsid]);
                         if (resReturn[0][0] && resReturn[0][0].userid == list[i].userid) {
                             rawArray.push(list[i].groupsid)
                         }
@@ -358,6 +370,18 @@ class Groups {
                     resolve(rawArray);
                 } catch (err) {
                     console.log(err)
+                    reject(err)
+                }
+            }
+        )
+    }
+    GetParticipantsCount (data) {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    var resReturn =  await myConnection.query('SELECT COUNT(*) AS cnt FROM participants WHERE groupsid = ?', [data[0]]);
+                    resolve(resReturn[0][0].cnt);
+                } catch (err) {
                     reject(err)
                 }
             }
