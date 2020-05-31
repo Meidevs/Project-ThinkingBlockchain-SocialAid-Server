@@ -30,7 +30,6 @@ router.get('/groupstatus', async (req, res) => {
         for (var i = 0; i < list[0].length; i++) {
             groupsidList.push(list[0][i].groupsid);
         }
-        console.log(groupsidList)
         // Get All of STC From Groups Table & Sum All of STC.
         var stcReturn = await rewardsModel.GetAllSTC(groupsidList);
         var stcSum = stcReturn.reduce(function (preValue, currentValue) {
@@ -46,15 +45,25 @@ router.get('/groupstatus', async (req, res) => {
 
         // Get Profit Of Period From Rewards Table.
         var reProfit = await rewardsModel.GetAllProfit(userid)
-        var repSum = reProfit.reduce(function (preValue, currentValue) {
-            return (preValue + currentValue)
-        });
+        if (reProfit[0] != undefined) {
+            var repSum = reProfit.reduce(function (preValue, currentValue) {
+                return (preValue + currentValue)
+            });
+        } else {
+            var repSum = 0;
+        }
+        
 
         // Get Repayment From Groups Table.
         var repReturn = await rewardsModel.GetAllRepayment(groupsidList)
-        var repaSum = repReturn.reduce(function (preValue, currentValue) {
-            return (preValue + currentValue)
-        });
+        if (repReturn[0] != undefined) {
+            var repaSum = repReturn.reduce(function (preValue, currentValue) {
+                return (preValue + currentValue)
+            });
+        } else {
+            var repaSum = 0;
+        }
+        
         // Get Groups Count From Participants Table.
         var cntReturn = await groupModel.GetAllJoinedList(userid);
         cnt = cntReturn[0].length;

@@ -56,11 +56,25 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
-router.post('/myinfo', async (req, res) => {
+router.get('/myinfo', async (req, res) => {
   try {
-    
-  } catch (err) {
+    var dataSet = new Object();
 
+    req.session.user.wallet = 'W23iA2jSuAODhjWusJShbXmSI81KSapOsXY35';
+    
+    // Santa Wallet API
+    var ableSTC = 1000;
+    var totalSTC = 1800;
+    var name = req.session.user.name;
+    dataSet = {
+      wallet : req.session.user.wallet,
+      ableSTC : ableSTC,
+      totalSTC : totalSTC,
+      name : name
+    }
+    res.status(200).send(dataSet)
+  } catch (err) {
+    res.status(500).send(err)
   }
 })
 
