@@ -139,6 +139,69 @@ class Functions {
             }
         )
     }
+    YearCalculator(years) {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    var yearArray = new Array();
+                    for (var i = 0; i < years.length; i++) {
+                        var sum = 0;
+                        for (var j = 0; j < 12; j++) {
+                            sum += years[i].month[j].total;
+                        }
+                        yearArray.push({year : years[i].year, total : sum})
+                    }
+                    resolve(yearArray)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+
+    MonthCalculator(years) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var now = new Date();
+                    var nowMonth = now.getMonth();
+                    var monthArray = new Array();
+                    var before = nowMonth - 6;
+                    var after = nowMonth + 6;
+                    if (nowMonth == 6) {
+                        for (var i = 0; i < 12; i++) {
+                            monthArray.push({month : i, total : years[3].month[i].total});
+                        }
+                    } else {
+                        if (before < 0) {
+                            before = (nowMonth - 6) * (-1);
+
+                            for (var i = 12 - before; i < 12; i++ ){
+                                monthArray.push({month : i, total : years[2].month[i].total});
+                            }
+                            for (var i = 0; i < after; i++) {
+                                monthArray.push({month : i, total : years[3].month[i].total});
+                            }
+                        }
+                        else if(after > 12) {
+                            after = (nowMonth + 6) - 12;
+
+                            for (var i = before; i < 12; i++) {
+                                monthArray.push({month : i, total : years[3].month[i].total});
+                            }
+
+                            for(var i = 0; i < after; i++) {
+                                monthArray.push({month : i, total : years[4].month[i].total});
+                            }
+                        }    
+                    }
+                    resolve(monthArray);
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
 }
 
 

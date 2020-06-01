@@ -89,7 +89,6 @@ router.get('/groupstatus', async (req, res) => {
         var yearArray = new Array();
 
         var nowYear = now.getFullYear();
-        var nowMonth = now.getMonth() + 1;
         for (var i = nowYear - 3; i <= nowYear + 3; i++) {
             var insObj = new Object();
 
@@ -117,40 +116,15 @@ router.get('/groupstatus', async (req, res) => {
                 }
             }
         })
-        console.log(yearArray[3].month)
-
-        // var yearArray = new Array();
-        // var monthArray = new Array();
-
-        // for (var x = 0; x < rawArray.length; x++) {
-        //     var insObj = new Object();
-        //     var insObj_2 = new Object();
-        //     var sum = 0;
-        //     insObj = {
-        //         year: rawArray[x],
-        //         total: null,
-        //     }
-        //     insObj_2 = {
-        //         year: rawArray[x],
-        //         month: null,
-        //         total: null,
-        //     }
-        //     for (var i = 0; i < mReturn.length; i++) {
-        //         if (rawArray[x] == mReturn[i].annually) {
-        //             sum += mReturn[i].total;
-        //         }
-        //     }
-        //     insObj.total = sum;
-        //     yearArray.push(insObj);
-        // }
-
+        var annually = await functions.YearCalculator(yearArray)
+        var monthly = await functions.MonthCalculator(yearArray)
         dataSet.totalSTC = stcSum;
         dataSet.revenue = revSum;
         dataSet.profit = repSum;
         dataSet.repayment = repaSum;
         dataSet.count = cnt;
-        // dataSet.annually = yearArray;
-        // dataSet.monthly = mReturn;
+        dataSet.annually = annually;
+        dataSet.monthly = monthly;
         res.status(200).send(dataSet)
     } catch (err) {
         console.log(err)
