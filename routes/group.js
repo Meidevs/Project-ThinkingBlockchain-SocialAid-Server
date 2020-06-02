@@ -36,7 +36,7 @@ router.post('/creategroup', async (req, res) => {
 
         var dataSet = new Object();
         var storyid = await groupModel.CreateNewStoried(req.body.story);
-
+        console.log(req.session.user.userid)
         dataSet = {
             userid: req.session.user.userid,
             catesid: req.body.catesid,

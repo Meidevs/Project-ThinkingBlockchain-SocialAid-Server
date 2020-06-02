@@ -20,6 +20,7 @@ router.post('/login', async (req, res, next) => {
       name : resResult.dataSet.name,
       phone : resResult.dataSet.phone,
     }
+    console.log(req.session.user)
     res.status(200).send(resResult)
   } catch (err) {
     res.status(500).send(resResult)

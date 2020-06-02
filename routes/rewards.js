@@ -11,15 +11,15 @@ router.get('/groupstatus', async (req, res) => {
         var groupsidList = new Array();
         var rawArray = new Array();
         var dataSet = new Object();
-
+        console.log(req.session.user.userid)
         // Transfer Total STC, Revenue, Balance, Profit, Repayment, Groups Count, Total STC Annually & Monthly
         dataSet = {
-            totalSTC: null,
-            revenue: null,
-            balance: null,
-            profit: null,
-            repayment: null,
-            count: null,
+            totalSTC: 0,
+            revenue: 0,
+            balance: 0,
+            profit: 0,
+            repayment: 0,
+            count: 0,
             annually: null,
             monthly: null,
         }
@@ -30,101 +30,113 @@ router.get('/groupstatus', async (req, res) => {
         for (var i = 0; i < list[0].length; i++) {
             groupsidList.push(list[0][i].groupsid);
         }
-        // Get All of STC From Groups Table & Sum All of STC.
-        var stcReturn = await rewardsModel.GetAllSTC(groupsidList);
-        var stcSum = stcReturn.reduce(function (preValue, currentValue) {
-            return (preValue + currentValue)
-        });
-        // Get All of Revenue From Groups Table & Calculate Revenue.
-        var revReturn = await rewardsModel.GetAllRevenue(groupsidList, userid);
-        var revSum = revReturn.reduce(function (preValue, currentValue) {
-            return (preValue + currentValue)
-        });
 
-        // Get Balance From Santa Wallet
-
-        // Get Profit Of Period From Rewards Table.
-        var reProfit = await rewardsModel.GetAllProfit(userid)
-        if (reProfit[0] != undefined) {
-            var repSum = reProfit.reduce(function (preValue, currentValue) {
+        if (groupsidList[0] == null) {
+            dataSet.totalSTC = 0;
+            dataSet.revenue = 0;
+            dataSet.profit = 0;
+            dataSet.repayment = 0;
+            dataSet.count = 0;
+            dataSet.annually = [];
+            dataSet.monthly = [];
+        } else {
+            // Get All of STC From Groups Table & Sum All of STC.
+            var stcReturn = await rewardsModel.GetAllSTC(groupsidList);
+            var stcSum = stcReturn.reduce(function (preValue, currentValue) {
                 return (preValue + currentValue)
             });
-        } else {
-            var repSum = 0;
-        }
-
-
-        // Get Repayment From Groups Table.
-        var repReturn = await rewardsModel.GetAllRepayment(groupsidList)
-        if (repReturn[0] != undefined) {
-            var repaSum = repReturn.reduce(function (preValue, currentValue) {
+            // Get All of Revenue From Groups Table & Calculate Revenue.
+            var revReturn = await rewardsModel.GetAllRevenue(groupsidList, userid);
+            var revSum = revReturn.reduce(function (preValue, currentValue) {
                 return (preValue + currentValue)
             });
-        } else {
-            var repaSum = 0;
-        }
 
-        // Get Groups Count From Participants Table.
-        var cntReturn = await groupModel.GetAllJoinedList(userid);
-        cnt = cntReturn[0].length;
+            // Get Balance From Santa Wallet
 
-        // Get Reward Data
-        // {
-        //     [
-        //         annually : data
-        //         monthly : data
-        //         total : data
-        //     ]
-        // }
-        var mReturn = await rewardsModel.DateRewards(userid);
-
-        // Extract Years From mReturn Variables, Push Years to raw Array.
-        // Remove Duplicates Variables in rawArray using filter Function.
-        for (var i = 0; i < mReturn.length; i++) {
-            rawArray.push(mReturn[i].annually);
-        }
-        var rawArray = rawArray.filter((item, index) => rawArray.indexOf(item) == index);
-
-        var now = new Date();
-        var yearArray = new Array();
-
-        var nowYear = now.getFullYear();
-        for (var i = nowYear - 3; i <= nowYear + 3; i++) {
-            var insObj = new Object();
-
-            insObj.year = i;
-            yearArray.push(insObj);
-
-        }
-        for (var i = 0; i < yearArray.length; i++) {
-            var rawArray = [];
-
-            for (var j = 1; j <= 12; j++) {
-                rawArray.push({ month: j, total: 0 })
+            // Get Profit Of Period From Rewards Table.
+            var reProfit = await rewardsModel.GetAllProfit(userid)
+            if (reProfit[0] != undefined) {
+                var repSum = reProfit.reduce(function (preValue, currentValue) {
+                    return (preValue + currentValue)
+                });
+            } else {
+                var repSum = 0;
             }
-            yearArray[i].month = rawArray
-        }
 
-        yearArray.map((data) => {
+
+            // Get Repayment From Groups Table.
+            var repReturn = await rewardsModel.GetAllRepayment(groupsidList)
+            if (repReturn[0] != undefined) {
+                var repaSum = repReturn.reduce(function (preValue, currentValue) {
+                    return (preValue + currentValue)
+                });
+            } else {
+                var repaSum = 0;
+            }
+
+            // Get Groups Count From Participants Table.
+            var cntReturn = await groupModel.GetAllJoinedList(userid);
+            cnt = cntReturn[0].length;
+
+            // Get Reward Data
+            // {
+            //     [
+            //         annually : data
+            //         monthly : data
+            //         total : data
+            //     ]
+            // }
+            var mReturn = await rewardsModel.DateRewards(userid);
+
+            // Extract Years From mReturn Variables, Push Years to raw Array.
+            // Remove Duplicates Variables in rawArray using filter Function.
             for (var i = 0; i < mReturn.length; i++) {
-                if (data.year == mReturn[i].annually) {
-                    for (var j = 0; j < data.month.length; j++) {
-                        if (data.month[j].month == mReturn[i].monthly) {
-                            data.month[j].total = mReturn[i].total;
+                rawArray.push(mReturn[i].annually);
+            }
+            var rawArray = rawArray.filter((item, index) => rawArray.indexOf(item) == index);
+
+            var now = new Date();
+            var yearArray = new Array();
+
+            var nowYear = now.getFullYear();
+            for (var i = nowYear - 3; i <= nowYear + 3; i++) {
+                var insObj = new Object();
+
+                insObj.year = i;
+                yearArray.push(insObj);
+
+            }
+            for (var i = 0; i < yearArray.length; i++) {
+                var rawArray = [];
+
+                for (var j = 1; j <= 12; j++) {
+                    rawArray.push({ month: j, total: 0 })
+                }
+                yearArray[i].month = rawArray
+            }
+
+            yearArray.map((data) => {
+                for (var i = 0; i < mReturn.length; i++) {
+                    if (data.year == mReturn[i].annually) {
+                        for (var j = 0; j < data.month.length; j++) {
+                            if (data.month[j].month == mReturn[i].monthly) {
+                                data.month[j].total = mReturn[i].total;
+                            }
                         }
                     }
                 }
-            }
-        })
-        var annually = await functions.YearCalculator(yearArray)
-        var monthly = await functions.MonthCalculator(yearArray)
-        dataSet.totalSTC = stcSum;
-        dataSet.revenue = revSum;
-        dataSet.profit = repSum;
-        dataSet.repayment = repaSum;
-        dataSet.count = cnt;
-        dataSet.annually = annually;
-        dataSet.monthly = monthly;
+            })
+            var annually = await functions.YearCalculator(yearArray)
+            var monthly = await functions.MonthCalculator(yearArray)
+            dataSet.totalSTC = stcSum;
+            dataSet.revenue = revSum;
+            dataSet.profit = repSum;
+            dataSet.repayment = repaSum;
+            dataSet.count = cnt;
+            dataSet.annually = annually;
+            dataSet.monthly = monthly;
+        }
+
         res.status(200).send(dataSet)
     } catch (err) {
         console.log(err)
