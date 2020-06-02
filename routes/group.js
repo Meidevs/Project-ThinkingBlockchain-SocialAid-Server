@@ -19,24 +19,14 @@ router.get('/grouplist', async (req, res) => {
     }
 });
 
-router.get('/getcates', async (req, res) => {
-    try {
-        var catesList = await groupModel.GetAllCates();
-        res.status(200).send(catesList)
-    } catch (err) {
-        res.status(500).send(err)
-    }
-})
-
 router.post('/creategroup', async (req, res) => {
     try {
         // Check Who Request to Make Group Using Session.
         // Insert Userid into dataSet.
         // Request Santa Wallet Lock Up to Santa Wallet API
-
+        console.log(req.session)
         var dataSet = new Object();
         var storyid = await groupModel.CreateNewStoried(req.body.story);
-        console.log(req.session.user.userid)
         dataSet = {
             userid: req.session.user.userid,
             catesid: req.body.catesid,
