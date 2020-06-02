@@ -10,6 +10,7 @@ var groupRouter = require('./routes/group');
 var usersRouter = require('./routes/users');
 var rewardsRouter = require('./routes/rewards');
 var alarmRouter = require('./routes/alarm');
+var adminRouter = require('./routes/admin');
 
 var cron = require('./routes/schedule');
 
@@ -40,6 +41,8 @@ app.use('/api', groupRouter);
 app.use('/api/alarm', alarmRouter);
 app.use('/api/rewards', rewardsRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/admin', adminRouter);
+
 // app.use(cron);
 
 // catch 404 and forward to error handler
