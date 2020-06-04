@@ -11,7 +11,6 @@ router.get('/groupstatus', async (req, res) => {
         var groupsidList = new Array();
         var rawArray = new Array();
         var dataSet = new Object();
-        console.log(req.session.user.userid)
         // Transfer Total STC, Revenue, Balance, Profit, Repayment, Groups Count, Total STC Annually & Monthly
         dataSet = {
             totalSTC: 0,
@@ -27,10 +26,9 @@ router.get('/groupstatus', async (req, res) => {
 
         // Extract groupsid List Using Userid Which Stored in Session Storage.
         var list = await groupModel.GetAllJoinedList(userid);
-        for (var i = 0; i < list[0].length; i++) {
-            groupsidList.push(list[0][i].groupsid);
+        for (var i = 0; i < list.length; i++) {
+            groupsidList.push(list[i].groupsid);
         }
-
         if (groupsidList[0] == null) {
             dataSet.totalSTC = 0;
             dataSet.revenue = 0;
@@ -76,7 +74,7 @@ router.get('/groupstatus', async (req, res) => {
 
             // Get Groups Count From Participants Table.
             var cntReturn = await groupModel.GetAllJoinedList(userid);
-            cnt = cntReturn[0].length;
+            cnt = cntReturn.length;
 
             // Get Reward Data
             // {
@@ -151,13 +149,12 @@ router.get('/groupstatus/detail/:id', async (req, res) => {
         var dataSet = new Object();
         var joinArray = new Array();
         var list = await groupModel.GetAllJoinedList(userid);
-
         // Extract Only Groupsid From participants Table Using GetAllJoinedList Function.
-        for (var i = 0; i < list[0].length; i++) {
-            joinArray.push(list[0][i].groupsid)
+        for (var i = 0; i < list.length; i++) {
+            joinArray.push(list[i].groupsid)
         }
         // Get Groupsid Which created by Self
-        var hostArray = await groupModel.GetHostGroupList(list[0]);
+        var hostArray = await groupModel.GetHostGroupList(list);
 
         for (var i = 0; i < hostArray.length; i++) {
             const idx = joinArray.indexOf(hostArray[i])
@@ -168,7 +165,6 @@ router.get('/groupstatus/detail/:id', async (req, res) => {
         // Differentiate Waiting (status = 0), Ongoing (status = 1), Done (status = 2);
         var hostReturn = await groupModel.GetGroupdatas(hostArray);
         var joinReturn = await groupModel.GetGroupdatas(joinArray);
-
         dataSet = {
             host: [],
             join: [],

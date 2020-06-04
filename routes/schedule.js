@@ -16,12 +16,14 @@ cron.schedule("00 00 * * *", async () => {
     var day = date.getDate();
     var dateString = year + '-' + month + '-' + day;
 
-    // Get Participants List to Transfer Wallet Addr to Santa Wallet API
+    // Get Participants List From participants Table.
+    // At Duedate
     var resReturn = await groupModel.GetParticipantsListOfDate(dateString);
     for (var i = 0; i < resReturn.length; i++) {
       var groupsidList = resReturn[i].groupsid;
       listArray.push(groupsidList)
     }
+    // Remove Duplicate Users.
     var indexList = listArray.filter((item, index) => listArray.indexOf(item) == index);
 
     for (var i = 0; i < indexList.length; i++) {
@@ -37,9 +39,10 @@ cron.schedule("00 00 * * *", async () => {
       }
       rewardsArray.push(rawObj)
     }
-
-    // Transfer Wallet List to Santa.  
-    await rewardsModel.GetWalletList(rawObj.users);
+    // Transfer Wallet List to Santa. 
+    // Transfer Wallet Addr to Santa Wallet API
+    // 수정 요망
+    // await rewardsModel.GetWalletList(rawObj.users);
 
 
     await rewardsModel.InsertRewards(rewardsArray);

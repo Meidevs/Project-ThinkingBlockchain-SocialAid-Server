@@ -23,8 +23,10 @@ router.post('/creategroup', async (req, res) => {
     try {
         // Check Who Request to Make Group Using Session.
         // Insert Userid into dataSet.
+
         // Request Santa Wallet Lock Up to Santa Wallet API
-        console.log(req.session)
+        // (여기에 산타 월렛 락 요청 모듈)
+
         var dataSet = new Object();
         var storyid = await groupModel.CreateNewStoried(req.body.story);
         dataSet = {
@@ -36,6 +38,7 @@ router.post('/creategroup', async (req, res) => {
             stc: req.body.stc,
             period: req.body.period
         }
+
         //After Receive Lock Up Complete Response
         await groupModel.CreateNewGroups(dataSet);
 
@@ -77,7 +80,7 @@ router.post('/search', async (req, res) => {
 
         // Get All GroupList & Arrange Data into Array 
         var groupsList = await groupModel.GetAllStatusOn();
-        for (let value of groupsList[0]) {
+        for (let value of groupsList) {
             rawArray.push({ groupsid: value.groupsid, catesid: value.catesid, userid: value.userid, groupname: value.groupname })
         }
 
@@ -129,16 +132,16 @@ router.post('/loadgroup', async (req, res) => {
         // 2. Cancel Join :
         // 3. Join Group : 
         res.status(200).send({
-            flags : flags,
-            groupsid : resReturn[0].groupsid,
-            host : resReturn[0].host,
-            cates : resReturn[0].cates,
-            story : resReturn[0].story,
-            groupname : resReturn[0].groupname,
-            stc : resReturn[0].stc,
-            period : resReturn[0].period,
-            stc : resReturn[0].stc,
-            participants : reCount
+            flags: flags,
+            groupsid: resReturn[0].groupsid,
+            host: resReturn[0].host,
+            cates: resReturn[0].cates,
+            story: resReturn[0].story,
+            groupname: resReturn[0].groupname,
+            stc: resReturn[0].stc,
+            tstc: (parseInt(resReturn[0].stc) * parseInt(resReturn[0].period)),
+            period: resReturn[0].period,
+            participants: reCount
         })
     } catch (err) {
         console.log(err);
@@ -160,7 +163,7 @@ router.post('/cancelgroup', async (req, res) => {
         //After Getting Unlock Process is Complete, Server will Ask Database to Change Status of Groups Table & Remove the Tuple From Participants Table .
         await groupModel.ChangeStatusDeprecated(groupsid);
         await groupModel.RemoveTupleParticipantsList(groupsid);
-        
+
         res.status(200).send(true)
     } catch (err) {
         console.log(err);
@@ -182,18 +185,44 @@ router.post('/canceljoin', async (req, res) => {
 
 router.post('/joingroup', async (req, res) => {
     try {
-        //
         var userid = req.session.user.userid;
-        var groupsid = [req.body.groupsid];
-        var period = await groupModel.GetGroupdatas(groupsid);
+        var wallet = req.session.user.wallet;
+        var pin = req.session.user.pin;
+        var resResult = false;
+        // Santa API Wallet Balance Check Request,
+        // let resAPI = await fetch('http://api.santavision.net/check/balance', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({ type: 'stc', address: wallet, pin: pin })
+        // })
+        // let json = await resAPI.json();
 
-        totalParticipants = period[0].period;
-        // To join the Group 
-        await groupModel.ParticipantInGroup(groupsid, userid, totalParticipants);
-        res.status(200).send(true);
+        json = {
+            result : true,
+            data : {
+                type : 'stc',
+                balance : 1000
+            }
+        }
+        if (json.result == true) {
+            var groupsid = [req.body.groupsid];
+            var period = await groupModel.GetGroupdatas(groupsid);
+            totalParticipants = period[0].period;
+            var total = parseInt(period[0].stc) * parseInt(period[0].period);
+            if (total <= json.data.balance) {
+                resResult = true;
+                // Lockup Request
+                await groupModel.ParticipantInGroup(groupsid, userid, totalParticipants);
+            } else {
+                resResult = false;
+            }
+            // To join the Group 
+        } 
+        res.status(200).send(resResult);
     } catch (err) {
-        res.status(500).send(true)
-
+        res.status(500).send(err)
     }
 });
 

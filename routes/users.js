@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var functions = require('../public/javascripts/functions/functions.js')
 var userModel = require('../public/javascripts/components/authModel.js');
+var groupModel = require('../public/javascripts/components/groupModel.js');
 
 router.post('/login', async (req, res, next) => {
   try {
@@ -13,14 +14,15 @@ router.post('/login', async (req, res, next) => {
     }
     resResult = await userModel.Login(dataSet);
 
-    // Insert Session Storage, E-mail, Name, Userid, Phone
+    // Insert Session Storage, E-mail, Name, Userid, Phone, wallet
     req.session.user = {
-      userid : resResult.dataSet.userid,
-      email : resResult.dataSet.email,
-      name : resResult.dataSet.name,
-      phone : resResult.dataSet.phone,
+      userid: resResult.dataSet.userid,
+      email: resResult.dataSet.email,
+      name: resResult.dataSet.name,
+      phone: resResult.dataSet.phone,
+      // wallet: ,
+      // pin: ,
     }
-    console.log(req.session.user)
     res.status(200).send(resResult)
   } catch (err) {
     res.status(500).send(resResult)
@@ -60,18 +62,44 @@ router.post('/register', async (req, res, next) => {
 router.get('/myinfo', async (req, res) => {
   try {
     var dataSet = new Object();
-
-    req.session.user.wallet = 'W23iA2jSuAODhjWusJShbXmSI81KSapOsXY35';
-    
-    // Santa Wallet API
-    var ableSTC = 1000;
-    var totalSTC = 1800;
+    var userid = req.session.user.userid;
+    var wallet = req.session.user.wallet;
+    var pin = req.session.user.pin;
     var name = req.session.user.name;
+    var joinArray = new Array();
+
+    // Get ableBalance From Santa API,
+    // let resBalance = await fetch('http://api.santavision.net/check/balance', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     body: JSON.stringify({ type: 'stc', address: wallet, pin: pin })
+    //   }
+    // })
+    // let json = await resBalance.json();
+
+    var list = await groupModel.GetAllJoinedList(userid)
+
+    for (var i = 0; i < list.length; i++) {
+      joinArray.push(list[i].groupsid)
+    }
+    var resReturn = await groupModel.GetGroupdatas(joinArray);
+    console.log(resReturn)
+    var stcArray = new Array();
+    for (var i = 0; i < resReturn.length; i++) {
+      stcArray.push(parseInt(resReturn[i].stc) * parseInt(resReturn[i].period))
+    }
+    var revSum = stcArray.reduce(function (preValue, currentValue) {
+      return (preValue + currentValue)
+    });
+    
+    var ableSTC = 1000;
+    var totalSTC = revSum + ableSTC;
     dataSet = {
-      wallet : req.session.user.wallet,
-      ableSTC : ableSTC,
-      totalSTC : totalSTC,
-      name : name
+      wallet: wallet,
+      ableSTC: ableSTC,
+      totalSTC: totalSTC,
+      name: name
     }
     res.status(200).send(dataSet)
   } catch (err) {

@@ -1,4 +1,5 @@
-var myConnection = require('../../../dbConfig.js');
+// var myConnection = require('../../../dbConfig.js');
+var myConnection = require('../../../mdbConfig.js');
 var functions = require('../functions/functions.js');
 
 class User {
@@ -7,7 +8,7 @@ class User {
             async (resolve, reject) => {
                 try {
                     var rawReturn = await myConnection.query('SELECT userid FROM members WHERE name = ?', [data]);
-                    resolve(rawReturn[0][0].userid)
+                    resolve(rawReturn.userid)
                 } catch (err) {
                     reject(err)
                 }
@@ -20,7 +21,7 @@ class User {
             async (resolve, reject) => {
                 try {
                     var rawReturn = await myConnection.query('SELECT name FROM members WHERE userid = ?', [data]);
-                    resolve(rawReturn[0][0].name)
+                    resolve(rawReturn[0].name)
                 } catch (err) {
                     reject(err)
                 }
@@ -60,7 +61,7 @@ class User {
 
                     var flags = 0;
                     var allUsers = await this.SelectAll();
-                    for (const content of allUsers[0]) {
+                    for (const content of allUsers) {
                         if (content.email == data.email) {
                             flags = 1;
                             break;
@@ -72,8 +73,7 @@ class User {
                             // Create Date Based Number to Make userid
                             var ym = await functions.DateCreator();
                             var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,3,"0") AS cnt FROM members');
-
-                            var code = 'U' + ym + returnCount[0][0].cnt;
+                            var code = 'U' + ym + returnCount[0].cnt;
 
                             rawObj.userid = code;
 
@@ -110,12 +110,12 @@ class User {
                     var resObj = new Object();
 
                     var rawReturn = await myConnection.query('SELECT * FROM members WHERE email = ?', [data.email]);
-                    if (rawReturn[0][0]) {
+                    if (rawReturn[0]) {
                         rawReturn = await myConnection.query('SELECT * FROM members WHERE email = ? AND password = ?', [data.email, data.password])
-                        if (rawReturn[0][0]) {
+                        if (rawReturn[0]) {
                             resObj = {
                                 flag: 0,
-                                dataSet: rawReturn[0][0]
+                                dataSet: rawReturn[0]
                             }
                         } else {
                             resObj = {

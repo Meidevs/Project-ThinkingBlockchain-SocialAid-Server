@@ -1,4 +1,5 @@
-var myConnection = require('../../../dbConfig.js');
+// var myConnection = require('../../../dbConfig.js');
+var myConnection = require('../../../mdbConfig.js');
 var functions = require('../functions/functions.js');
 var userModel = require('../components/authModel.js');
 var groupModel = require('../components/groupModel.js');
@@ -10,8 +11,8 @@ class Rewards {
                 try {
                     var rawArray = new Array();
                     for (var i = 0; i < list.length; i++) {
-                        var stc = await myConnection.query('SELECT stc FROM groups WHERE groupsid = ?', [list[i]]);
-                        rawArray.push(stc[0][0].stc);
+                        var resReturn = await myConnection.query('SELECT stc, period FROM groups WHERE groupsid = ?', [list[i]]);
+                        rawArray.push(parseInt(resReturn[0].stc) * parseInt(resReturn[0].period));
                     }
                     resolve(rawArray);
                 } catch (err) {
@@ -28,7 +29,7 @@ class Rewards {
                     for (var i = 0; i < list.length; i++) {
                         var revenue = 2;
                         var resReturn = await myConnection.query('SELECT period, userid FROM groups WHERE groupsid = ?', [list[i]]);
-                        if (resReturn[0][0].userid == userid) {
+                        if (resReturn[0].userid == userid) {
                             revenue = revenue + 20;
                         }
                         rawArray.push(revenue);
@@ -50,13 +51,13 @@ class Rewards {
                     for (var i = 0; i < list.length; i++) {
                         var rawRev = await myConnection.query('SELECT stc, period, userid FROM groups WHERE groupsid = ?', [list[i].groupsid])
                         for (var j = 0; j < list[i].users.length; j++) {
-                            if (rawRev[0][0].userid == list[i].users[j]) {
-                                var rev = (rawRev[0][0].stc * rawRev[0][0].period) * 0.22;
+                            if (rawRev[0].userid == list[i].users[j]) {
+                                var rev = (rawRev[0].stc * rawRev[0].period) * 0.22;
                             } else {
-                                var rev = (rawRev[0][0].stc * rawRev[0][0].period) * 0.02;
+                                var rev = (rawRev[0].stc * rawRev[0].period) * 0.02;
                             }
                             var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,7,"0") AS cnt FROM rewards');
-                            var code = 'R' + resReturn[0][0].cnt
+                            var code = 'R' + resReturn[0].cnt
                             await myConnection.query('INSERT INTO rewards (rewardsid, groupsid, userid, date, revenue) VALUES (?, ?, ?, ?, ?)', [code, list[i].groupsid, list[i].users[j], ymd, rev])
                         }
                         await myConnection.query('UPDATE groups SET status = 2 WHERE groupsid = ?', [list[i].groupsid]);
@@ -75,8 +76,8 @@ class Rewards {
                     var rawArray = new Array();
                     var resReturn = await myConnection.query('SELECT revenue FROM rewards WHERE userid = ?', [userid]);
 
-                    for (var i = 0; i < resReturn[0].length; i++) {
-                        rawArray.push(parseInt(resReturn[0][i].revenue))
+                    for (var i = 0; i < resReturn.length; i++) {
+                        rawArray.push(parseInt(resReturn[i].revenue))
                     }
                     resolve(rawArray);
                 } catch (err) {
@@ -92,9 +93,9 @@ class Rewards {
                 try {
                     var rawArray = new Array();
                     for (var i = 0; i < list.length; i++) {
-                        var resReturn = await myConnection.query('SELECT stc FROM groups WHERE groupsid = ? AND status = 2', [list[i]]);
-                        if (resReturn[0][0]) {
-                            rawArray.push(resReturn[0][0].stc);
+                        var resReturn = await myConnection.query('SELECT stc, period FROM groups WHERE groupsid = ? AND status = 2', [list[i]]);
+                        if (resReturn[0]) {
+                            rawArray.push(parseInt(resReturn[0].stc) * parseInt(resReturn[0].period));
                         }
                     }
                     resolve(rawArray);
@@ -110,7 +111,7 @@ class Rewards {
             async (resolve, reject) => {
                 try {
                     var dateMoney = await myConnection.query('SELECT year(date) AS annually, month(date) AS monthly, SUM(revenue) AS total FROM rewards WHERE userid = ? GROUP BY YEAR(date), MONTH(date) ', [userid]);
-                    resolve(dateMoney[0])
+                    resolve(dateMoney)
                 } catch (err) {
                     reject(err)
                 }

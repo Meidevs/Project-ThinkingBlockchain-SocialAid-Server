@@ -1,4 +1,5 @@
-var myConnection = require('../../../dbConfig.js');
+// var myConnection = require('../../../dbConfig.js');
+var myConnection = require('../../../mdbConfig.js');
 var functions = require('../functions/functions.js');
 var userModel = require('../components/authModel.js');
 
@@ -49,31 +50,31 @@ class Groups {
             async (resolve, reject) => {
                 try {
                     var rawReturn = await myConnection.query('SELECT sentence FROM story WHERE storyid = ?', [data]);
-                    resolve(rawReturn[0][0].sentence)
+                    resolve(rawReturn[0].sentence)
                 } catch (err) {
                     reject(err)
                 }
             }
         )
     }
-    GetAllCates() {
-        return new Promise(
-            async (resolve, reject) => {
-                try {
-                    var resReturn = await myConnection.query('SELECT catesid, name FROM cates');
-                    resolve(resReturn[0])
-                } catch (err) {
-                    reject * (err)
-                }
-            }
-        )
-    }
+    // GetAllCates() {
+    //     return new Promise(
+    //         async (resolve, reject) => {
+    //             try {
+    //                 var resReturn = await myConnection.query('SELECT catesid, name FROM cates');
+    //                 resolve(resReturn)
+    //             } catch (err) {
+    //                 reject * (err)
+    //             }
+    //         }
+    //     )
+    // }
     GetCates(data) {
         return new Promise(
             async (resolve, reject) => {
                 try {
                     var rawReturn = await myConnection.query('SELECT name FROM cates WHERE catesid = ?', [data]);
-                    resolve(rawReturn[0][0].name)
+                    resolve(rawReturn[0].name)
                 } catch (err) {
                     reject(err)
                 }
@@ -103,22 +104,22 @@ class Groups {
                         var resReturn = await myConnection.query('SELECT * FROM groups WHERE groupsid = ?', [data[i]]);
 
                         // Get User's Name Using userid From memebers Table;
-                        var name = await userModel.GetName(resReturn[0][0].userid);
+                        var name = await userModel.GetName(resReturn[0].userid);
 
                         // Get Category's Name Using catesid From cates Table;
-                        var cates = await this.GetCates(resReturn[0][0].catesid);
+                        var cates = await this.GetCates(resReturn[0].catesid);
 
                         // Get Sentence Using storyid From story Table;
-                        var story = await this.GetStories(resReturn[0][0].storyid);
+                        var story = await this.GetStories(resReturn[0].storyid);
 
-                        rawObj.groupsid = resReturn[0][0].groupsid;
+                        rawObj.groupsid = resReturn[0].groupsid;
                         rawObj.host = name;
                         rawObj.cates = cates;
                         rawObj.story = story;
-                        rawObj.groupname = resReturn[0][0].groupname;
-                        rawObj.stc = resReturn[0][0].stc;
-                        rawObj.period = resReturn[0][0].period;
-                        rawObj.status = resReturn[0][0].status;
+                        rawObj.groupname = resReturn[0].groupname;
+                        rawObj.stc = resReturn[0].stc;
+                        rawObj.period = resReturn[0].period;
+                        rawObj.status = resReturn[0].status;
                         rawArray.push(JSON.parse(JSON.stringify(rawObj)))
                     }
 
@@ -184,12 +185,12 @@ class Groups {
                 //http://trandent.com/article/Etc/detail/670 코드 생성 참고
                 try {
                     var ym = await functions.DateCreator();
-                    var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,4,"0") AS cnt FROM story');
-                    var code = 'S' + ym + returnCount[0][0].cnt;
+                    var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM story');
+                    var code = 'S' + ym + returnCount[0].cnt;
 
                     await myConnection.query('INSERT INTO story (storyid, sentence) VALUES (?, ?)', [code, data]);
-                    var storyid = await myConnection.query('SELECT storyid FROM story WHERE id=LAST_INSERT_ID()');
-                    resolve(storyid[0][0].storyid)
+                    // var storyid = await myConnection.query('SELECT storyid FROM story WHERE stoid=LAST_INSERT_ID()');
+                    resolve(code)
                 } catch (err) {
                     reject(err)
                 }
@@ -203,8 +204,8 @@ class Groups {
                 try {
                     // INSERT Group data to Groups Table.
                     var ym = await functions.DateCreator();
-                    var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,4,"0") AS cnt FROM groups');
-                    var code = 'G' + ym + returnCount[0][0].cnt;
+                    var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM groups');
+                    var code = 'G' + ym + returnCount[0].cnt;
 
                     data.groupsid = code;
                     var date = await functions.DateCreator();
@@ -212,8 +213,8 @@ class Groups {
 
                     // INSERT dataSet to Participants Table.
 
-                    var returnCount_2 = await myConnection.query('SELECT LPAD(COUNT(*) + 1,4,"0") AS cnt FROM participants');
-                    var code_2 = 'P' + ym + returnCount_2[0][0].cnt;
+                    var returnCount_2 = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM participants');
+                    var code_2 = 'P' + ym + returnCount_2[0].cnt;
 
                     data.participantsid = code_2;
 
@@ -244,16 +245,16 @@ class Groups {
                     }
 
                     var resReturn = await this.GetAllStatusOn();
-                    for (var i = 0; i < resReturn[0].length; i++) {
-                        var resultStory = await this.GetStories(resReturn[0][i].storyid)
-                        var resultName = await userModel.GetName(resReturn[0][i].userid);
-                        rawObj.groupsid = resReturn[0][i].groupsid,
-                            rawObj.groupname = resReturn[0][i].groupname,
+                    for (var i = 0; i < resReturn.length; i++) {
+                        var resultStory = await this.GetStories(resReturn[i].storyid)
+                        var resultName = await userModel.GetName(resReturn[i].userid);
+                        rawObj.groupsid = resReturn[i].groupsid,
+                            rawObj.groupname = resReturn[i].groupname,
                             rawObj.host = resultName,
-                            rawObj.cates = resReturn[0][i].catesid,
+                            rawObj.cates = resReturn[i].catesid,
                             rawObj.story = resultStory,
-                            rawObj.stc = resReturn[0][i].stc,
-                            rawObj.period = resReturn[0][i].period,
+                            rawObj.stc = resReturn[i].stc,
+                            rawObj.period = resReturn[i].period,
 
                             rawArray.push(JSON.parse(JSON.stringify(rawObj)))
                     }
@@ -277,12 +278,12 @@ class Groups {
                         userid: null,
                     }
                     var resReturn = await myConnection.query('SELECT * FROM participants WHERE userid = ? AND groupsid = ?', [user, group]);
-                    if (resReturn[0][0]) {
+                    if (resReturn[0]) {
                         dataSet = {
                             flags: 1,
-                            participantsid: resReturn[0][0].participantsid,
-                            groupsid: resReturn[0][0].groupsid,
-                            userid: resReturn[0][0].userid,
+                            participantsid: resReturn[0].participantsid,
+                            groupsid: resReturn[0].groupsid,
+                            userid: resReturn[0].userid,
                         }
                     }
                     resolve(dataSet)
@@ -299,16 +300,16 @@ class Groups {
                 try {
                     var dateData = await functions.RateDateMaker(totalParticipants);
                     var ym = await functions.DateCreator();
-                    var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,4,"0") AS cnt FROM participants');
+                    var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM participants');
                     var resCount = await myConnection.query('SELECT COUNT(*) + 1 AS cnt FROM participants WHERE groupsid = ?', [groupsid]);
-                    var code = 'P' + ym + resReturn[0][0].cnt;
+                    var code = 'P' + ym + resReturn[0].cnt;
                     await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid) VALUES (?, ?, ?)', [code, userid, groupsid]);
 
-                    if (totalParticipants == resCount[0][0].cnt) {
+                    if (totalParticipants == resCount[0].cnt) {
                         await myConnection.query('UPDATE groups SET status=1 WHERE groupsid = ?', [groupsid])
                         var partList = await myConnection.query('SELECT participantsid FROM participants WHERE groupsid = ?', [groupsid]);
                         for (var i = 0; i < totalParticipants; i++) {
-                            await myConnection.query('UPDATE participants SET ratedate = ?, duedate = ? WHERE participantsid = ? AND groupsid = ?', [dateData.dateArray[i], dateData.dueDate, partList[0][i].participantsid, groupsid])
+                            await myConnection.query('UPDATE participants SET ratedate = ?, duedate = ? WHERE participantsid = ? AND groupsid = ?', [dateData.dateArray[i], dateData.dueDate, partList[i].participantsid, groupsid])
                         }
                     }
                     resolve(true)
@@ -349,7 +350,7 @@ class Groups {
             async (resolve, reject) => {
                 try {
                     var resReturn = await myConnection.query('SELECT * FROM participants WHERE duedate = ?', [date]);
-                    resolve(resReturn[0])
+                    resolve(resReturn)
                 } catch (err) {
                     reject(err)
                 }
@@ -363,7 +364,7 @@ class Groups {
                     var rawArray = new Array();
                     for (var i = 0; i < list.length; i++) {
                         var resReturn = await myConnection.query('SELECT userid FROM groups WHERE groupsid = ?', [list[i].groupsid]);
-                        if (resReturn[0][0] && resReturn[0][0].userid == list[i].userid) {
+                        if (resReturn[0] && resReturn[0].userid == list[i].userid) {
                             rawArray.push(list[i].groupsid)
                         }
                     }
@@ -380,7 +381,7 @@ class Groups {
             async (resolve, reject) => {
                 try {
                     var resReturn =  await myConnection.query('SELECT COUNT(*) AS cnt FROM participants WHERE groupsid = ?', [data[0]]);
-                    resolve(resReturn[0][0].cnt);
+                    resolve(resReturn[0].cnt);
                 } catch (err) {
                     reject(err)
                 }
