@@ -41,7 +41,7 @@ class Functions {
                         var dayCode = JSON.stringify(b)
                     }
                     var yearCode = JSON.stringify(date.getFullYear());
-                    var returnData = yearCode + '-'+ monthCode + '-' + dayCode;
+                    var returnData = yearCode + monthCode + dayCode;
                     resolve(returnData)
                 } catch (err) {
                     console.log(err)
@@ -89,8 +89,6 @@ class Functions {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    console.log('data', data)
-                    console.log('filter', filter)
                     var rawArray = new Array();
                     var cnt = 0;
 

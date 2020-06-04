@@ -44,6 +44,7 @@ cron.schedule("00 00 * * *", async () => {
     // 수정 요망
     // await rewardsModel.GetWalletList(rawObj.users);
 
+    let unlockAPI = await fetch('')
 
     await rewardsModel.InsertRewards(rewardsArray);
   } catch (err) {

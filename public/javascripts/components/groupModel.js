@@ -86,9 +86,9 @@ class Groups {
                         groupname: null,
                         stc: null,
                         period: null,
-                        date : null,
+                        date: null,
                     }
-                    
+
                     for (var i = 0; i < data.length; i++) {
                         var resReturn = await myConnection.query('SELECT * FROM groups WHERE groupsid = ?', [data[i]]);
 
@@ -140,11 +140,11 @@ class Groups {
                     var rawArray = new Array();
                     var resReturn = await myConnection.query('SELECT * FROM participants WHERE groupsid = ?', [groupsid]);
                     var groupReturn = await myConnection.query('SELECT stc, period, date FROM groups WHERE groupsid = ?', [groupsid]);
-                    var date = groupReturn[0].date + ' 23:59:59'
+                    var date = groupReturn[0].date.substring(0,4) + '-' + groupReturn[0].date.substring(4,6) + '-' + groupReturn[0].date.substring(6,8) + ' 23:59:59'
                     var totalSTC = parseInt(groupReturn[0].stc) * parseInt(groupReturn[0].period)
                     for (var i = 0; i < resReturn.length; i++) {
                         var userReturn = await myConnection.query('SELECT wallet FROM members WHERE userid = ?', [resReturn[i].userid]);
-                        rawArray.push({ coinWalletAddress: userReturn[0].wallet, amount : totalSTC, partnerCode : 'SOCIALADE', endDate : date })
+                        rawArray.push({ coinWalletAddress: userReturn[0].wallet, amount: totalSTC, partnerCode: 'SOCIALADE', endDate: date })
                     }
                     resolve(rawArray)
                 } catch (err) {
@@ -286,24 +286,43 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var dateData = await functions.RateDateMaker(totalParticipants);
+                    // var dateData = await functions.RateDateMaker(totalParticipants);
                     var ym = await functions.DateCreator();
                     var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM participants');
-                    var resCount = await myConnection.query('SELECT COUNT(*) + 1 AS cnt FROM participants WHERE groupsid = ?', [groupsid]);
                     var code = 'P' + ym + resReturn[0].cnt;
                     await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid) VALUES (?, ?, ?)', [code, userid, groupsid]);
+                    var resCount = await myConnection.query('SELECT COUNT(*) AS cnt FROM participants WHERE groupsid = ?', [groupsid]);
 
-                    if (totalParticipants == resCount[0].cnt) {
-                        await myConnection.query('UPDATE groups SET status=1 WHERE groupsid = ?', [groupsid])
-                        var partList = await myConnection.query('SELECT participantsid FROM participants WHERE groupsid = ?', [groupsid]);
-                        for (var i = 0; i < totalParticipants; i++) {
-                            await myConnection.query('UPDATE participants SET ratedate = ?, duedate = ? WHERE participantsid = ? AND groupsid = ?', [dateData.dateArray[i], dateData.dueDate, partList[i].participantsid, groupsid])
-                        }
-                    }
-                    resolve(true)
+                    // if (totalParticipants == resCount[0].cnt) {
+                    //     await myConnection.query('UPDATE groups SET status=1 WHERE groupsid = ?', [groupsid])
+                    //     var partList = await myConnection.query('SELECT participantsid FROM participants WHERE groupsid = ?', [groupsid]);
+                    //     for (var i = 0; i < totalParticipants; i++) {
+                    //         await myConnection.query('UPDATE participants SET ratedate = ?, duedate = ? WHERE participantsid = ? AND groupsid = ?', [dateData.dateArray[i], dateData.dueDate, partList[i].participantsid, groupsid])
+                    //     }
+                    // }
+                    resolve(resCount[0].cnt)
                 } catch (err) {
                     console.log(err)
                     reject(err)
+                }
+            }
+        )
+    }
+
+    GroupsRun(groupsid, totalParticipants) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var dateData = await functions.RateDateMaker(totalParticipants);
+
+                    await myConnection.query('UPDATE groups SET status=1 WHERE groupsid = ?', [groupsid])
+                    var partList = await myConnection.query('SELECT participantsid FROM participants WHERE groupsid = ?', [groupsid]);
+                    for (var i = 0; i < totalParticipants; i++) {
+                        await myConnection.query('UPDATE participants SET ratedate = ?, duedate = ? WHERE participantsid = ? AND groupsid = ?', [dateData.dateArray[i], dateData.dueDate, partList[i].participantsid, groupsid])
+                    }
+                    resolve(true)
+                } catch (err) {
+                    reject(err);
                 }
             }
         )
@@ -345,6 +364,7 @@ class Groups {
             }
         )
     }
+    
     GetHostGroupList(list) {
         return new Promise(
             async (resolve, reject) => {
@@ -364,14 +384,28 @@ class Groups {
             }
         )
     }
-    GetParticipantsCount (data) {
-        return new Promise (
+    GetParticipantsCount(data) {
+        return new Promise(
             async (resolve, reject) => {
                 try {
-                    var resReturn =  await myConnection.query('SELECT COUNT(*) AS cnt FROM participants WHERE groupsid = ?', [data[0]]);
+                    var resReturn = await myConnection.query('SELECT COUNT(*) AS cnt FROM participants WHERE groupsid = ?', [data[0]]);
                     resolve(resReturn[0].cnt);
                 } catch (err) {
                     reject(err)
+                }
+            }
+        )
+    }
+
+    GetDueDate (groupsid) {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    var resReturn = await myConnection.query('SELECT duedate FROM participants WHERE groupsid=?', [groupsid]);
+                    console.log(resReturn)
+                    resolve(resReturn[0].duedate)
+                } catch (err) {
+
                 }
             }
         )
