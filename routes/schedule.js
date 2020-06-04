@@ -14,7 +14,7 @@ cron.schedule("00 00 * * *", async () => {
     var year = date.getFullYear();
     var month = date.getMonth() + 1;
     var day = date.getDate();
-    var dateString = year + '-' + month + '-' + day;
+    var dateString = await functions.DateCreator();
 
     // Get Participants List From participants Table.
     // At Duedate

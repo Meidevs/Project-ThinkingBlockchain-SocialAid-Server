@@ -3,6 +3,19 @@ var myConnection = require('../../../mdbConfig.js');
 var functions = require('../functions/functions.js');
 
 class User {
+    GetWallet () {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    var resReturn = await myConnection.query('SELECT wallet FROM members WHERE userid =?', [data]);
+                    resolve(resReturn[0].wallet)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+
     GetMembersCode(data) {
         return new Promise(
             async (resolve, reject) => {

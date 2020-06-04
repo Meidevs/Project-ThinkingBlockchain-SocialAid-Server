@@ -57,18 +57,6 @@ class Groups {
             }
         )
     }
-    // GetAllCates() {
-    //     return new Promise(
-    //         async (resolve, reject) => {
-    //             try {
-    //                 var resReturn = await myConnection.query('SELECT catesid, name FROM cates');
-    //                 resolve(resReturn)
-    //             } catch (err) {
-    //                 reject * (err)
-    //             }
-    //         }
-    //     )
-    // }
     GetCates(data) {
         return new Promise(
             async (resolve, reject) => {
@@ -98,6 +86,7 @@ class Groups {
                         groupname: null,
                         stc: null,
                         period: null,
+                        date : null,
                     }
                     
                     for (var i = 0; i < data.length; i++) {
@@ -119,7 +108,9 @@ class Groups {
                         rawObj.groupname = resReturn[0].groupname;
                         rawObj.stc = resReturn[0].stc;
                         rawObj.period = resReturn[0].period;
+                        rawObj.date = resReturn[0].date;
                         rawObj.status = resReturn[0].status;
+
                         rawArray.push(JSON.parse(JSON.stringify(rawObj)))
                     }
 
@@ -147,16 +138,13 @@ class Groups {
             async (resolve, reject) => {
                 try {
                     var rawArray = new Array();
-
                     var resReturn = await myConnection.query('SELECT * FROM participants WHERE groupsid = ?', [groupsid]);
-                    var userReturn = await myConnection.query('SELECT * FROM members');
-
-                    for (var i = 0; i < resReturn[0].length; i++) {
-                        for (var j = 0; j < userReturn[0].length; j++) {
-                            if (resReturn[0][i].userid == userReturn[0][j].userid) {
-                                rawArray.push({ userid: userReturn[0][j].userid, wallet: userReturn[0][j].wallet })
-                            }
-                        }
+                    var groupReturn = await myConnection.query('SELECT stc, period, date FROM groups WHERE groupsid = ?', [groupsid]);
+                    var date = groupReturn[0].date + ' 23:59:59'
+                    var totalSTC = parseInt(groupReturn[0].stc) * parseInt(groupReturn[0].period)
+                    for (var i = 0; i < resReturn.length; i++) {
+                        var userReturn = await myConnection.query('SELECT wallet FROM members WHERE userid = ?', [resReturn[i].userid]);
+                        rawArray.push({ coinWalletAddress: userReturn[0].wallet, amount : totalSTC, partnerCode : 'SOCIALADE', endDate : date })
                     }
                     resolve(rawArray)
                 } catch (err) {

@@ -79,28 +79,38 @@ router.get('/myinfo', async (req, res) => {
     // let json = await resBalance.json();
 
     var list = await groupModel.GetAllJoinedList(userid)
-
+    console.log(list)
     for (var i = 0; i < list.length; i++) {
       joinArray.push(list[i].groupsid)
     }
-    var resReturn = await groupModel.GetGroupdatas(joinArray);
-    console.log(resReturn)
-    var stcArray = new Array();
-    for (var i = 0; i < resReturn.length; i++) {
-      stcArray.push(parseInt(resReturn[i].stc) * parseInt(resReturn[i].period))
-    }
-    var revSum = stcArray.reduce(function (preValue, currentValue) {
-      return (preValue + currentValue)
-    });
     
-    var ableSTC = 1000;
-    var totalSTC = revSum + ableSTC;
-    dataSet = {
-      wallet: wallet,
-      ableSTC: ableSTC,
-      totalSTC: totalSTC,
-      name: name
+    if (joinArray[0] == undefined) {
+      dataSet = {
+        wallet: wallet,
+        ableSTC: 0,
+        totalSTC: 0,
+        name: name
+      }
+    } else {
+      var resReturn = await groupModel.GetGroupdatas(joinArray);
+      var stcArray = new Array();
+      for (var i = 0; i < resReturn.length; i++) {
+        stcArray.push(parseInt(resReturn[i].stc) * parseInt(resReturn[i].period))
+      }
+      var revSum = stcArray.reduce(function (preValue, currentValue) {
+        return (preValue + currentValue)
+      });
+
+      var ableSTC = 1000;
+      var totalSTC = revSum + ableSTC;
+      dataSet = {
+        wallet: wallet,
+        ableSTC: ableSTC,
+        totalSTC: totalSTC,
+        name: name
+      }
     }
+
     res.status(200).send(dataSet)
   } catch (err) {
     res.status(500).send(err)
