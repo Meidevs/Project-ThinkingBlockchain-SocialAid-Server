@@ -86,8 +86,9 @@ class Groups {
                         stc: null,
                         period: null,
                     }
+                    console.log(data[0])
                     for (var i = 0; i < data.length; i++) {
-                        var resReturn = await myConnection.query('SELECT * FROM groups WHERE groupsid = ?', [data]);
+                        var resReturn = await myConnection.query('SELECT * FROM groups WHERE groupsid = ?', [data[i]]);
 
                         // Get User's Name Using userid From memebers Table;
                         var name = await userModel.GetName(resReturn[0][0].userid);
@@ -105,7 +106,7 @@ class Groups {
                         rawObj.groupname = resReturn[0][0].groupname;
                         rawObj.stc = resReturn[0][0].stc;
                         rawObj.period = resReturn[0][0].period;
-
+                        rawObj.status = resReturn[0][0].status;
                         rawArray.push(JSON.parse(JSON.stringify(rawObj)))
                     }
 
@@ -120,7 +121,6 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    console.log(groupsid)
                     await myConnection.query('UPDATE groups SET status=999 WHERE groupsid = ?', [groupsid]);
                     resolve(true)
                 } catch (err) {
@@ -289,14 +289,12 @@ class Groups {
                     var ym = await functions.DateCreator();
                     var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,4,"0") AS cnt FROM participants');
                     var resCount = await myConnection.query('SELECT COUNT(*) + 1 AS cnt FROM participants WHERE groupsid = ?', [groupsid]);
-                    console.log(resCount[0][0].cnt)
                     var code = 'P' + ym + resReturn[0][0].cnt;
                     await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid) VALUES (?, ?, ?)', [code, userid, groupsid]);
 
                     if (totalParticipants == resCount[0][0].cnt) {
                         await myConnection.query('UPDATE groups SET status=1 WHERE groupsid = ?', [groupsid])
                         var partList = await myConnection.query('SELECT participantsid FROM participants WHERE groupsid = ?', [groupsid]);
-                        console.log(partList[0])
                         for (var i = 0; i < totalParticipants; i++) {
                             await myConnection.query('UPDATE participants SET ratedate = ?, duedate = ? WHERE participantsid = ? AND groupsid = ?', [dateData.dateArray[i], dateData.dueDate, partList[0][i].participantsid, groupsid])
                         }

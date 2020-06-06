@@ -58,7 +58,6 @@ router.post('/search', async (req, res) => {
         // Distinguish There are Catesid, Hostname, Groupname or Not
         // 
         if (req.body.name != null) {
-            console.log(req.body.name)
             reqCode = await authModel.GetMembersCode(req.body.name);
         } else {
             reqCode = null;
@@ -95,7 +94,7 @@ router.post('/loadgroup', async (req, res) => {
         var dataSet = new Object();
         var flags;
         var groupsid = [req.body.groupsid];
-
+        console.log(groupsid)
         // Call User Session Data Using Session Storage
         var user = req.session.user.userid;
         var userName = req.session.user.name;
@@ -176,7 +175,6 @@ router.post('/joingroup', async (req, res) => {
         var period = await groupModel.GetGroupdatas(groupsid);
 
         totalParticipants = period[0].period;
-        console.log(totalParticipants)
         // To join the Group 
         await groupModel.ParticipantInGroup(groupsid, userid, totalParticipants);
         res.status(200).send(true);

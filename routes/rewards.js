@@ -105,8 +105,10 @@ router.get('/groupstatus', async (req, res) => {
     }
 });
 
-router.get('/groupstatus/detail', async (req, res) => {
+router.get('/groupstatus/detail/:id', async (req, res) => {
     try {
+        var params = req.params;
+        console.log(params)
         var userid = req.session.user.userid;
         var dataSet = new Object();
         var rawArray = new Array();
@@ -120,7 +122,7 @@ router.get('/groupstatus/detail', async (req, res) => {
 
         // Get Groupsid Which created by Self
         var hostArray = await groupModel.GetHostGroupList(list[0]);
-
+        console.log(hostArray)
         // Differentiate between Self-Made and Non-Made Groupsid
         for (var x = 0; x < rawArray.length; x++) {
             for (var y = 0; y < hostArray.length; y++) {
@@ -129,24 +131,76 @@ router.get('/groupstatus/detail', async (req, res) => {
                 }
             }
         }
+        console.log(joinArray)
 
         // HostArray :
         // JoinArray : 
         // Differentiate Waiting (status = 0), Ongoing (status = 1), Done (status = 2);
-
-        if (num = 0) {
-            await groupModel.GetGroupsListBasedOnStatus()
-        } else if (num = 1) {
-            await groupModel.GetGroupsListBasedOnStatus()
-        } else {
-            await groupModel.GetGroupsListBasedOnStatus()
-        }
-
+        var hostReturn = await groupModel.GetGroupdatas(hostArray);
+        var joinReturn = await groupModel.GetGroupdatas(joinArray);
         dataSet = {
-            host: resReturn,
+            host : [],
+            join : [],
         }
-    } catch (err) {
+        if (params.id == 'waiting') {
+            var insArray_1 = new Array();
+            var insArray_2 = new Array();
 
+            hostReturn.forEach(item => {
+                if (item.status == 0) {
+                    insArray_1.push(item)
+                }
+            });
+            joinReturn.forEach(item => {
+                if (item.status == 0) {
+                    insArray_2.push(item)
+                }
+            });
+            dataSet = {
+                host : insArray_1,
+                join : insArray_2
+            }
+        } else if (params.id == 'ongoing') {
+            var insArray_1 = new Array();
+            var insArray_2 = new Array();
+
+            hostReturn.forEach(item => {
+                if (item.status == 1) {
+                    insArray_1.push(item)
+                }
+            });
+            joinReturn.forEach(item => {
+                if (item.status == 1) {
+                    insArray_2.push(item)
+                }
+            });
+            dataSet = {
+                host : insArray_1,
+                join : insArray_2
+            }
+        } else if (params.id == 'done') {
+            var insArray_1 = new Array();
+            var insArray_2 = new Array();
+
+            hostReturn.forEach(item => {
+                if (item.status == 2) {
+                    insArray_1.push(item)
+                }
+            });
+            joinReturn.forEach(item => {
+                if (item.status == 2) {
+                    insArray_2.push(item)
+                }
+            });
+            dataSet = {
+                host : insArray_1,
+                join : insArray_2
+            }
+        }
+        res.status(200).send(dataSet);
+    } catch (err) {
+        console.log(err)
+        res.status(500).send(err)
     }
 })
 
