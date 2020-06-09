@@ -49,7 +49,7 @@ cron.schedule("00 00 * * *", async () => {
           rawObj = {
             coinWalletAddress: null,
             amount: null,
-            partnerCode: 'SOCIALADE'
+            partnerCode: 'TESTCODE'
           }
           if (data.userid == userArray[i].users[j].userid) {
             rawObj.coinWalletAddress = userArray[i].users[j].wallet

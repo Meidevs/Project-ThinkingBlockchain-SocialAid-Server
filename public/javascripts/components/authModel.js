@@ -3,12 +3,12 @@ var myConnection = require('../../../mdbConfig.js');
 var functions = require('../functions/functions.js');
 
 class User {
-    GetWallet () {
+    GetWallet (data) {
         return new Promise (
             async (resolve, reject) => {
                 try {
-                    var resReturn = await myConnection.query('SELECT wallet FROM members WHERE userid =?', [data]);
-                    resolve(resReturn[0].wallet)
+                    var resReturn = await myConnection.query('SELECT coin_wallet_address FROM tb_user_info WHERE user_seq =?', [data]);
+                    resolve(resReturn[0].coin_wallet_address)
                 } catch (err) {
                     reject(err)
                 }
@@ -20,8 +20,8 @@ class User {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var rawReturn = await myConnection.query('SELECT userid FROM members WHERE name = ?', [data]);
-                    resolve(rawReturn.userid)
+                    var rawReturn = await myConnection.query('SELECT user_seq FROM tb_user_info WHERE name = ?', [data]);
+                    resolve(rawReturn.user_seq)
                 } catch (err) {
                     reject(err)
                 }
@@ -33,7 +33,7 @@ class User {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var rawReturn = await myConnection.query('SELECT name FROM members WHERE userid = ?', [data]);
+                    var rawReturn = await myConnection.query('SELECT name FROM tb_user_info WHERE user_seq = ?', [data]);
                     resolve(rawReturn[0].name)
                 } catch (err) {
                     reject(err)
@@ -46,7 +46,7 @@ class User {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var sql = 'SELECT * FROM members';
+                    var sql = 'SELECT * FROM tb_user_info';
                     var rawReturn = await myConnection.query(sql);
                     resolve(rawReturn);
                 } catch (err) {
@@ -85,12 +85,12 @@ class User {
                         case 0:
                             // Create Date Based Number to Make userid
                             var ym = await functions.DateCreator();
-                            var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,3,"0") AS cnt FROM members');
+                            var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,3,"0") AS cnt FROM tb_user_info');
                             var code = 'U' + ym + returnCount[0].cnt;
 
                             rawObj.userid = code;
 
-                            var sql = 'INSERT INTO members (userid, email, phone, name, password, pin, wallet) VALUES (?, ?, ?, ?, ?, ?, ?)';
+                            var sql = 'INSERT INTO tb_user_info (userid, email, phone, name, password, pin, wallet) VALUES (?, ?, ?, ?, ?, ?, ?)';
                             await myConnection.query(sql, [rawObj.userid, rawObj.email, rawObj.phonenumber, rawObj.name, rawObj.password, rawObj.pin, rawObj.wallet])
 
                             var resObj = {
@@ -122,13 +122,16 @@ class User {
                     var flags;
                     var resObj = new Object();
 
-                    var rawReturn = await myConnection.query('SELECT * FROM members WHERE email = ?', [data.email]);
+                    var rawReturn = await myConnection.query('SELECT * FROM tb_user_info WHERE email = ?', [data.email]);
+			console.log(rawReturn[0]);	
                     if (rawReturn[0]) {
-                        rawReturn = await myConnection.query('SELECT * FROM members WHERE email = ? AND password = ?', [data.email, data.password])
+			console.log('a')
+                        var resReturn = await myConnection.query('SELECT * FROM tb_user_info WHERE email = ? AND passwd = ?', [data.email, data.password]);
+			console.log(resReturn[0])
                         if (rawReturn[0]) {
                             resObj = {
                                 flag: 0,
-                                dataSet: rawReturn[0]
+                                dataSet: resReturn[0]
                             }
                         } else {
                             resObj = {

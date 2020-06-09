@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var fetch = require('node-fetch');
 
 var groupModel = require('../public/javascripts/components/groupModel.js');
 var authModel = require('../public/javascripts/components/authModel.js');
@@ -40,6 +41,7 @@ router.post('/creategroup', async (req, res) => {
         }
         var total = parseInt(dataSet.stc) * parseInt(dataSet.period);
         // Request Santa Wallet Lock Up to Santa Wallet API
+	console.log('a')
         var resAPI = await fetch('http://api.santavision.net/check/balance', {
             method: 'POST',
             headers: {
@@ -48,6 +50,7 @@ router.post('/creategroup', async (req, res) => {
             body: JSON.stringify({ type: 'stc', address: wallet, pin: pin })
         })
         let json = await resAPI.json();
+console.log(json);
         if (total <= json.data.balance) {
             var now = new Date();
             var yd = now.getFullYear();
@@ -60,7 +63,7 @@ router.post('/creategroup', async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify([{ coinWalletAddress: wallet, amount: total, partnerCode: 'SOCIALADE', endDate: duedate }])
+                body: JSON.stringify([{ coinWalletAddress: wallet, amount: total, partnerCode: 'TESTCODE', endDate: duedate }])
             })
             if (lockAPI.ok) {
                 await groupModel.CreateNewGroups(dataSet);
@@ -214,7 +217,7 @@ router.post('/canceljoin', async (req, res) => {
         var dateString = resReturn[0].date.substring(0, 4) + '-' + resReturn[0].date.substring(4, 6) + '-' + resReturn[0].date.substring(6, 8) + ' 23:59:59';
 
         var totalSTC = parseInt(resReturn[0].stc) * parseInt(resReturn[0].period);
-        rawArray.push({ coinWalletAddress: wallet, amount: totalSTC, partnerCode: 'SOCIALADE', endDate: dateString });
+        rawArray.push({ coinWalletAddress: wallet, amount: totalSTC, partnerCode: 'TESTCODE', endDate: dateString });
 
         var resAPI = await fetch('http://api.santavision.net/unlock', {
             method: 'POST',
@@ -269,7 +272,7 @@ router.post('/joingroup', async (req, res) => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ coinWalletAddress: wallet, amount: total, partnerCode: 'SOCIALADE', endDate: endDate })
+                    body: JSON.stringify({ coinWalletAddress: wallet, amount: total, partnerCode: 'TESTCODE', endDate: endDate })
                 })
                 if (lockAPI.ok) {
                     console.log('1',lockAPI.result)

@@ -8,7 +8,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var sql = 'SELECT * FROM groups';
+                    var sql = 'SELECT * FROM ts_groups';
                     var rawReturn = await myConnection.query(sql);
                     resolve(rawReturn);
                 } catch (err) {
@@ -23,7 +23,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var rawReturn = await myConnection.query('SELECT * FROM groups WHERE status=0');
+                    var rawReturn = await myConnection.query('SELECT * FROM ts_groups WHERE status=0');
                     resolve(rawReturn);
                 } catch (err) {
                     reject(err)
@@ -36,7 +36,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var rawReturn = await myConnection.query('SELECT * FROM groups WHERE status=1');
+                    var rawReturn = await myConnection.query('SELECT * FROM ts_groups WHERE status=1');
                     resolve(rawReturn);
                 } catch (err) {
                     reject(err)
@@ -49,7 +49,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var rawReturn = await myConnection.query('SELECT sentence FROM story WHERE storyid = ?', [data]);
+                    var rawReturn = await myConnection.query('SELECT sentence FROM ts_story WHERE storyid = ?', [data]);
                     resolve(rawReturn[0].sentence)
                 } catch (err) {
                     reject(err)
@@ -61,7 +61,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var rawReturn = await myConnection.query('SELECT name FROM cates WHERE catesid = ?', [data]);
+                    var rawReturn = await myConnection.query('SELECT name FROM ts_cates WHERE catesid = ?', [data]);
                     resolve(rawReturn[0].name)
                 } catch (err) {
                     reject(err)
@@ -90,7 +90,7 @@ class Groups {
                     }
 
                     for (var i = 0; i < data.length; i++) {
-                        var resReturn = await myConnection.query('SELECT * FROM groups WHERE groupsid = ?', [data[i]]);
+                        var resReturn = await myConnection.query('SELECT * FROM ts_groups WHERE groupsid = ?', [data[i]]);
 
                         // Get User's Name Using userid From memebers Table;
                         var name = await userModel.GetName(resReturn[0].userid);
@@ -125,7 +125,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    await myConnection.query('UPDATE groups SET status=999 WHERE groupsid = ?', [groupsid]);
+                    await myConnection.query('UPDATE ts_groups SET status=999 WHERE groupsid = ?', [groupsid]);
                     resolve(true)
                 } catch (err) {
                     reject(err)
@@ -138,13 +138,13 @@ class Groups {
             async (resolve, reject) => {
                 try {
                     var rawArray = new Array();
-                    var resReturn = await myConnection.query('SELECT * FROM participants WHERE groupsid = ?', [groupsid]);
-                    var groupReturn = await myConnection.query('SELECT stc, period, date FROM groups WHERE groupsid = ?', [groupsid]);
+                    var resReturn = await myConnection.query('SELECT * FROM ts_participants WHERE groupsid = ?', [groupsid]);
+                    var groupReturn = await myConnection.query('SELECT stc, period, date FROM ts_groups WHERE groupsid = ?', [groupsid]);
                     var date = groupReturn[0].date.substring(0, 4) + '-' + groupReturn[0].date.substring(4, 6) + '-' + groupReturn[0].date.substring(6, 8) + ' 23:59:59'
                     var totalSTC = parseInt(groupReturn[0].stc) * parseInt(groupReturn[0].period)
                     for (var i = 0; i < resReturn.length; i++) {
-                        var userReturn = await myConnection.query('SELECT wallet FROM members WHERE userid = ?', [resReturn[i].userid]);
-                        rawArray.push({ coinWalletAddress: userReturn[0].wallet, amount: totalSTC, partnerCode: 'SOCIALADE', endDate: date })
+                        var userReturn = await myConnection.query('SELECT coin_wallet_address FROM tb_user_info WHERE user_seq = ?', [resReturn[i].userid]);
+                        rawArray.push({ coinWalletAddress: userReturn[0].coin_wallet_address, amount: totalSTC, partnerCode: 'TESTCODE', endDate: date })
                     }
                     resolve(rawArray)
                 } catch (err) {
@@ -158,7 +158,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    await myConnection.query('UPDATE participants SET groupsid = "G999999", userid = "U999999" WHERE groupsid = ?', [groupsid]);
+                    await myConnection.query('UPDATE ts_participants SET groupsid = "G999999", userid = "U999999" WHERE groupsid = ?', [groupsid]);
                     resolve(true);
                 } catch (err) {
                     reject(err)
@@ -173,11 +173,11 @@ class Groups {
                 //http://trandent.com/article/Etc/detail/670 코드 생성 참고
                 try {
                     var ym = await functions.DateCreator();
-                    var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM story');
+                    var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM ts_story');
                     var code = 'S' + ym + returnCount[0].cnt;
 
-                    await myConnection.query('INSERT INTO story (storyid, sentence) VALUES (?, ?)', [code, data]);
-                    // var storyid = await myConnection.query('SELECT storyid FROM story WHERE stoid=LAST_INSERT_ID()');
+                    await myConnection.query('INSERT INTO ts_story (storyid, sentence) VALUES (?, ?)', [code, data]);
+                    // var storyid = await myConnection.query('SELECT storyid FROM ts_story WHERE stoid=LAST_INSERT_ID()');
                     resolve(code)
                 } catch (err) {
                     reject(err)
@@ -192,21 +192,21 @@ class Groups {
                 try {
                     // INSERT Group data to Groups Table.
                     var ym = await functions.DateCreator();
-                    var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM groups');
+                    var returnCount = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM ts_groups');
                     var code = 'G' + ym + returnCount[0].cnt;
 
                     data.groupsid = code;
                     var date = await functions.DateCreator();
-                    await myConnection.query('INSERT INTO groups (userid, groupsid, storyid, catesid, groupname, stc, period, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [data.userid, data.groupsid, data.storyid, data.catesid, data.name, data.stc, data.period, date])
+                    await myConnection.query('INSERT INTO ts_groups (userid, groupsid, storyid, catesid, groupname, stc, period, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [data.userid, data.groupsid, data.storyid, data.catesid, data.name, data.stc, data.period, date])
 
                     // INSERT dataSet to Participants Table.
 
-                    var returnCount_2 = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM participants');
+                    var returnCount_2 = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM ts_participants');
                     var code_2 = 'P' + ym + returnCount_2[0].cnt;
 
                     data.participantsid = code_2;
 
-                    await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid) VALUES (?, ?, ?)', [data.participantsid, data.userid, data.groupsid])
+                    await myConnection.query('INSERT INTO ts_participants (participantsid, userid , groupsid) VALUES (?, ?, ?)', [data.participantsid, data.userid, data.groupsid])
 
                     resolve(data)
                 } catch (err) {
@@ -265,7 +265,7 @@ class Groups {
                         groupsid: null,
                         userid: null,
                     }
-                    var resReturn = await myConnection.query('SELECT * FROM participants WHERE userid = ? AND groupsid = ?', [user, group]);
+                    var resReturn = await myConnection.query('SELECT * FROM ts_participants WHERE userid = ? AND groupsid = ?', [user, group]);
                     if (resReturn[0]) {
                         dataSet = {
                             flags: 1,
@@ -288,10 +288,10 @@ class Groups {
                 try {
                     // var dateData = await functions.RateDateMaker(totalParticipants);
                     var ym = await functions.DateCreator();
-                    var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM participants');
+                    var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,6,"0") AS cnt FROM ts_participants');
                     var code = 'P' + ym + resReturn[0].cnt;
-                    await myConnection.query('INSERT INTO participants (participantsid, userid , groupsid) VALUES (?, ?, ?)', [code, userid, groupsid]);
-                    var resCount = await myConnection.query('SELECT COUNT(*) AS cnt FROM participants WHERE groupsid = ?', [groupsid]);
+                    await myConnection.query('INSERT INTO ts_participants (participantsid, userid , groupsid) VALUES (?, ?, ?)', [code, userid, groupsid]);
+                    var resCount = await myConnection.query('SELECT COUNT(*) AS cnt FROM ts_participants WHERE groupsid = ?', [groupsid]);
                     resolve(resCount[0].cnt)
                 } catch (err) {
                     console.log(err)
@@ -307,10 +307,10 @@ class Groups {
                 try {
                     var dateData = await functions.RateDateMaker(totalParticipants);
 
-                    await myConnection.query('UPDATE groups SET status=1 WHERE groupsid = ?', [groupsid])
-                    var partList = await myConnection.query('SELECT participantsid FROM participants WHERE groupsid = ?', [groupsid]);
+                    await myConnection.query('UPDATE ts_groups SET status=1 WHERE groupsid = ?', [groupsid])
+                    var partList = await myConnection.query('SELECT participantsid FROM ts_participants WHERE groupsid = ?', [groupsid]);
                     for (var i = 0; i < totalParticipants; i++) {
-                        await myConnection.query('UPDATE participants SET ratedate = ?, duedate = ? WHERE participantsid = ? AND groupsid = ?', [dateData.dateArray[i], dateData.dueDate, partList[i].participantsid, groupsid])
+                        await myConnection.query('UPDATE ts_participants SET ratedate = ?, duedate = ? WHERE participantsid = ? AND groupsid = ?', [dateData.dateArray[i], dateData.dueDate, partList[i].participantsid, groupsid])
                     }
                     resolve(true)
                 } catch (err) {
@@ -323,7 +323,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    await myConnection.query('UPDATE participants SET groupsid = "G000000", userid="U000000" WHERE groupsid = ? AND userid = ?', [groupsid, userid]);
+                    await myConnection.query('UPDATE ts_participants SET groupsid = "G000000", userid="U000000" WHERE groupsid = ? AND userid = ?', [groupsid, userid]);
                     resolve(0)
                 } catch (err) {
                     reject(err)
@@ -336,7 +336,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var resReturn = await myConnection.query('SELECT * FROM participants WHERE userid = ?', [userid]);
+                    var resReturn = await myConnection.query('SELECT * FROM ts_participants WHERE userid = ?', [userid]);
                     resolve(resReturn)
                 } catch (err) {
                     reject(err)
@@ -348,7 +348,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var resReturn = await myConnection.query('SELECT * FROM participants WHERE duedate = ?', [date]);
+                    var resReturn = await myConnection.query('SELECT * FROM ts_participants WHERE duedate = ?', [date]);
                     resolve(resReturn)
                 } catch (err) {
                     reject(err)
@@ -361,20 +361,20 @@ class Groups {
             async (resolve, reject) => {
                 try {
                     var rawArray = new Array();
-                    var resReturn = await myConnection.query('SELECT userid, groupsid FROM participants WHERE ratedate = ?', [date]);
+                    var resReturn = await myConnection.query('SELECT userid, groupsid FROM ts_participants WHERE ratedate = ?', [date]);
                     for (var i = 0; i < resReturn.length; i++) {
                         var rawObj = new Object();
-                        var insA = await myConnection.query('SELECT wallet FROM members WHERE userid = ?', [resReturn[i].userid]);
-                        var insB = await myConnection.query('SELECT stc, period, userid FROM groups WHERE groupsid = ?', [resReturn[i].groupsid]);
+                        var insA = await myConnection.query('SELECT coin_wallet_address FROM tb_user_info WHERE user_seq = ?', [resReturn[i].userid]);
+                        var insB = await myConnection.query('SELECT stc, period, userid FROM ts_groups WHERE groupsid = ?', [resReturn[i].groupsid]);
                         if (resReturn[i].userid == insB[0].userid) {
-                            rawObj.coinWalletAddress = insA[0].wallet;
+                            rawObj.coinWalletAddress = insA[0].coin_wallet_address;
                             rawObj.amount = (parseInt(insB[0].stc) * parseInt(insB[0].period) * 0.2) + (parseInt(insB[0].stc) * parseInt(insB[0].period) * 0.02);
-                            rawObj.partnerCode = 'SOCIALADE';
+                            rawObj.partnerCode = 'TESTCODE';
                             rawObj.endDate = date.substring(0,4) + '-' + date.substring(4,6) + '-' + date.substring(6,8) + ' 23:59:59';
                         } else {
-                            rawObj.coinWalletAddress = insA[0].wallet;
+                            rawObj.coinWalletAddress = insA[0].coin_wallet_address;
                             rawObj.amount = (parseInt(insB[0].stc) * parseInt(insB[0].period) * 0.02);
-                            rawObj.partnerCode = 'SOCIALADE';
+                            rawObj.partnerCode = 'TESTCODE';
                             rawObj.endDate = date.substring(0,4) + '-' + date.substring(4,6) + '-' + date.substring(6,8) + ' 23:59:59';
                         }
                         rawArray.push(rawObj);
@@ -394,7 +394,7 @@ class Groups {
                 try {
                     var rawArray = new Array();
                     for (var i = 0; i < list.length; i++) {
-                        var resReturn = await myConnection.query('SELECT userid FROM groups WHERE groupsid = ?', [list[i].groupsid]);
+                        var resReturn = await myConnection.query('SELECT userid FROM ts_groups WHERE groupsid = ?', [list[i].groupsid]);
                         if (resReturn[0] && resReturn[0].userid == list[i].userid) {
                             rawArray.push(list[i].groupsid)
                         }
@@ -411,7 +411,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var resReturn = await myConnection.query('SELECT COUNT(*) AS cnt FROM participants WHERE groupsid = ?', [data[0]]);
+                    var resReturn = await myConnection.query('SELECT COUNT(*) AS cnt FROM ts_participants WHERE groupsid = ?', [data[0]]);
                     resolve(resReturn[0].cnt);
                 } catch (err) {
                     reject(err)
@@ -424,7 +424,7 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var resReturn = await myConnection.query('SELECT duedate FROM participants WHERE groupsid=?', [groupsid]);
+                    var resReturn = await myConnection.query('SELECT duedate FROM ts_participants WHERE groupsid=?', [groupsid]);
                     console.log(resReturn)
                     resolve(resReturn[0].duedate)
                 } catch (err) {
@@ -441,7 +441,7 @@ class Groups {
                     var rawArray = new Array();
                     for (var i = 0; i < list.length; i++) {
                         var rawObj = new Object();
-                        var groupsReturn = await myConnection.query('SELECT userid, stc, period FROM groups WHERE groupsid =?', [list[i]]);
+                        var groupsReturn = await myConnection.query('SELECT userid, stc, period FROM ts_groups WHERE groupsid =?', [list[i]]);
                         var total = parseInt(groupsReturn[0].stc) * parseInt(groupsReturn[0].period);
                         rawObj.groupsid = list[i];
                         rawObj.userid = groupsReturn[0].userid;
@@ -463,7 +463,7 @@ class Groups {
 
                     for (var i = 0; i < list.length; i++) {
                         var rawObj = new Object();
-                        var resUsers = await myConnection.query('SELECT userid, wallet FROM members WHERE userid IN (SELECT userid FROM participants WHERE groupsid = ?)', [list[i]]);
+                        var resUsers = await myConnection.query('SELECT user_seq, coin_wallet_address FROM tb_user_info WHERE user_seq IN (SELECT userid FROM ts_participants WHERE groupsid = ?)', [list[i]]);
                         console.log('resUsers', resUsers)
                         rawObj.groupsid = list[i];
                         rawObj.users = resUsers;

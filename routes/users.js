@@ -11,18 +11,19 @@ router.post('/login', async (req, res, next) => {
     dataSet = {
       email: req.body.email,
       password: req.body.password
-    }
+    };
     resResult = await userModel.Login(dataSet);
 
     // Insert Session Storage, E-mail, Name, Userid, Phone, wallet
     req.session.user = {
-      userid: resResult.dataSet.userid,
+      userid: resResult.dataSet.user_seq,
       email: resResult.dataSet.email,
       name: resResult.dataSet.name,
-      phone: resResult.dataSet.phone,
-      // wallet: ,
-      // pin: ,
+      phone: resResult.dataSet.phone_number,
+      wallet: resResult.dataSet.coin_wallet_address,
+      pin: resResult.dataSet.pin_no,
     }
+	console.log(req.session.user)
     res.status(200).send(resResult)
   } catch (err) {
     res.status(500).send(resResult)

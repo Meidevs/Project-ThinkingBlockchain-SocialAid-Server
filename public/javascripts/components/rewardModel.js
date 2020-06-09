@@ -11,7 +11,7 @@ class Rewards {
                 try {
                     var rawArray = new Array();
                     for (var i = 0; i < list.length; i++) {
-                        var resReturn = await myConnection.query('SELECT stc, period FROM groups WHERE groupsid = ?', [list[i]]);
+                        var resReturn = await myConnection.query('SELECT stc, period FROM ts_groups WHERE groupsid = ?', [list[i]]);
                         rawArray.push(parseInt(resReturn[0].stc) * parseInt(resReturn[0].period));
                     }
                     resolve(rawArray);
@@ -28,7 +28,7 @@ class Rewards {
                     var rawArray = new Array();
                     for (var i = 0; i < list.length; i++) {
                         var revenue = 2;
-                        var resReturn = await myConnection.query('SELECT period, userid FROM groups WHERE groupsid = ?', [list[i]]);
+                        var resReturn = await myConnection.query('SELECT period, userid FROM ts_groups WHERE groupsid = ?', [list[i]]);
                         if (resReturn[0].userid == userid) {
                             revenue = revenue + 20;
                         }
@@ -49,18 +49,18 @@ class Rewards {
                 try {
                     var ymd = await functions.DateCreator();
                     for (var i = 0; i < list.length; i++) {
-                        var rawRev = await myConnection.query('SELECT stc, period, userid FROM groups WHERE groupsid = ?', [list[i].groupsid])
+                        var rawRev = await myConnection.query('SELECT stc, period, userid FROM ts_groups WHERE groupsid = ?', [list[i].groupsid])
                         for (var j = 0; j < list[i].users.length; j++) {
                             if (rawRev[0].userid == list[i].users[j]) {
                                 var rev = (rawRev[0].stc * rawRev[0].period) * 0.22;
                             } else {
                                 var rev = (rawRev[0].stc * rawRev[0].period) * 0.02;
                             }
-                            var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,7,"0") AS cnt FROM rewards');
+                            var resReturn = await myConnection.query('SELECT LPAD(COUNT(*) + 1,7,"0") AS cnt FROM ts_rewards');
                             var code = 'R' + resReturn[0].cnt
-                            await myConnection.query('INSERT INTO rewards (rewardsid, groupsid, userid, date, revenue) VALUES (?, ?, ?, ?, ?)', [code, list[i].groupsid, list[i].users[j], ymd, rev])
+                            await myConnection.query('INSERT INTO ts_rewards (rewardsid, groupsid, userid, date, revenue) VALUES (?, ?, ?, ?, ?)', [code, list[i].groupsid, list[i].users[j], ymd, rev])
                         }
-                        await myConnection.query('UPDATE groups SET status = 2 WHERE groupsid = ?', [list[i].groupsid]);
+                        await myConnection.query('UPDATE ts_groups SET status = 2 WHERE groupsid = ?', [list[i].groupsid]);
                     }
 
                 } catch (err) {
@@ -74,7 +74,7 @@ class Rewards {
             async (resolve, reject) => {
                 try {
                     var rawArray = new Array();
-                    var resReturn = await myConnection.query('SELECT revenue FROM rewards WHERE userid = ?', [userid]);
+                    var resReturn = await myConnection.query('SELECT revenue FROM ts_rewards WHERE userid = ?', [userid]);
 
                     for (var i = 0; i < resReturn.length; i++) {
                         rawArray.push(parseInt(resReturn[i].revenue))
@@ -93,7 +93,7 @@ class Rewards {
                 try {
                     var rawArray = new Array();
                     for (var i = 0; i < list.length; i++) {
-                        var resReturn = await myConnection.query('SELECT stc, period FROM groups WHERE groupsid = ? AND status = 2', [list[i]]);
+                        var resReturn = await myConnection.query('SELECT stc, period FROM ts_groups WHERE groupsid = ? AND status = 2', [list[i]]);
                         if (resReturn[0]) {
                             rawArray.push(parseInt(resReturn[0].stc) * parseInt(resReturn[0].period));
                         }
@@ -110,7 +110,7 @@ class Rewards {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var dateMoney = await myConnection.query('SELECT year(date) AS annually, month(date) AS monthly, SUM(revenue) AS total FROM rewards WHERE userid = ? GROUP BY YEAR(date), MONTH(date) ', [userid]);
+                    var dateMoney = await myConnection.query('SELECT year(date) AS annually, month(date) AS monthly, SUM(revenue) AS total FROM ts_rewards WHERE userid = ? GROUP BY YEAR(date), MONTH(date) ', [userid]);
                     resolve(dateMoney)
                 } catch (err) {
                     reject(err)
@@ -124,7 +124,7 @@ class Rewards {
                 try {
                     var rawArray = new Array();
                     for (var i = 0; i < list.length; i++) {
-                        var resReturn = await myConnection.query('SELECT wallet, pin FROM members WHERE userid=?', [list[i]]);
+                        var resReturn = await myConnection.query('SELECT coin_wallet_address, pin_no FROM tb_user_info WHERE user_seq = ?', [list[i]]);
                         rawArray.push(resReturn[0])
                     }
                     resolve(rawArray);
