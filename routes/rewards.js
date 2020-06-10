@@ -52,7 +52,7 @@ router.get('/groupstatus', async (req, res) => {
         } else {
             var repSum = 0;
         }
-        
+
 
         // Get Repayment From Groups Table.
         var repReturn = await rewardsModel.GetAllRepayment(groupsidList)
@@ -63,50 +63,94 @@ router.get('/groupstatus', async (req, res) => {
         } else {
             var repaSum = 0;
         }
-        
+
         // Get Groups Count From Participants Table.
         var cntReturn = await groupModel.GetAllJoinedList(userid);
         cnt = cntReturn[0].length;
 
-        // Get Monthly Reward Data
+        // Get Reward Data
+        // {
+        //     [
+        //         annually : data
+        //         monthly : data
+        //         total : data
+        //     ]
+        // }
         var mReturn = await rewardsModel.DateRewards(userid);
+
+        // Extract Years From mReturn Variables, Push Years to raw Array.
+        // Remove Duplicates Variables in rawArray using filter Function.
         for (var i = 0; i < mReturn.length; i++) {
             rawArray.push(mReturn[i].annually);
         }
         var rawArray = rawArray.filter((item, index) => rawArray.indexOf(item) == index);
 
+        var now = new Date();
         var yearArray = new Array();
-        var monthArray = new Array();
 
-        for (var x = 0; x < rawArray.length; x++) {
+        var nowYear = now.getFullYear();
+        var nowMonth = now.getMonth() + 1;
+        for (var i = nowYear - 3; i <= nowYear + 3; i++) {
             var insObj = new Object();
-            var insObj_2 = new Object();
-            var sum = 0;
-            insObj = {
-                year: rawArray[x],
-                total: null,
+
+            insObj.year = i;
+            yearArray.push(insObj);
+
+        }
+        for (var i = 0; i < yearArray.length; i++) {
+            var rawArray = [];
+
+            for (var j = 1; j <= 12; j++) {
+                rawArray.push({ month: j, total: 0 })
             }
-            insObj_2 = {
-                year: rawArray[x],
-                month: null,
-                total: null,
-            }
+            yearArray[i].month = rawArray
+        }
+
+        yearArray.map((data) => {
             for (var i = 0; i < mReturn.length; i++) {
-                if (rawArray[x] == mReturn[i].annually) {
-                    sum += mReturn[i].total;
+                if (data.year == mReturn[i].annually) {
+                    for (var j = 0; j < data.month.length; j++) {
+                        if (data.month[j].month == mReturn[i].monthly) {
+                            data.month[j].total = mReturn[i].total;
+                        }
+                    }
                 }
             }
-            insObj.total = sum;
-            yearArray.push(insObj);
-        }
+        })
+        console.log(yearArray[3].month)
+
+        // var yearArray = new Array();
+        // var monthArray = new Array();
+
+        // for (var x = 0; x < rawArray.length; x++) {
+        //     var insObj = new Object();
+        //     var insObj_2 = new Object();
+        //     var sum = 0;
+        //     insObj = {
+        //         year: rawArray[x],
+        //         total: null,
+        //     }
+        //     insObj_2 = {
+        //         year: rawArray[x],
+        //         month: null,
+        //         total: null,
+        //     }
+        //     for (var i = 0; i < mReturn.length; i++) {
+        //         if (rawArray[x] == mReturn[i].annually) {
+        //             sum += mReturn[i].total;
+        //         }
+        //     }
+        //     insObj.total = sum;
+        //     yearArray.push(insObj);
+        // }
 
         dataSet.totalSTC = stcSum;
         dataSet.revenue = revSum;
         dataSet.profit = repSum;
         dataSet.repayment = repaSum;
         dataSet.count = cnt;
-        dataSet.annually = yearArray;
-        dataSet.monthly = mReturn;
+        // dataSet.annually = yearArray;
+        // dataSet.monthly = mReturn;
         res.status(200).send(dataSet)
     } catch (err) {
         console.log(err)
@@ -117,37 +161,31 @@ router.get('/groupstatus', async (req, res) => {
 router.get('/groupstatus/detail/:id', async (req, res) => {
     try {
         var params = req.params;
-        console.log(params)
         var userid = req.session.user.userid;
         var dataSet = new Object();
-        var rawArray = new Array();
         var joinArray = new Array();
         var list = await groupModel.GetAllJoinedList(userid);
 
         // Extract Only Groupsid From participants Table Using GetAllJoinedList Function.
         for (var i = 0; i < list[0].length; i++) {
-            rawArray.push(list[0][i].groupsid)
+            joinArray.push(list[0][i].groupsid)
         }
-
         // Get Groupsid Which created by Self
         var hostArray = await groupModel.GetHostGroupList(list[0]);
 
-        // Differentiate between Self-Made and Non-Made Groupsid
-        for (var x = 0; x < rawArray.length; x++) {
-            for (var y = 0; y < hostArray.length; y++) {
-                if (rawArray[x] != hostArray[y]) {
-                    joinArray.push(rawArray[x])
-                }
-            }
+        for (var i = 0; i < hostArray.length; i++) {
+            const idx = joinArray.indexOf(hostArray[i])
+            if (idx > -1) joinArray.splice(idx, 1)
         }
         // HostArray :
         // JoinArray : 
         // Differentiate Waiting (status = 0), Ongoing (status = 1), Done (status = 2);
         var hostReturn = await groupModel.GetGroupdatas(hostArray);
         var joinReturn = await groupModel.GetGroupdatas(joinArray);
+
         dataSet = {
-            host : [],
-            join : [],
+            host: [],
+            join: [],
         }
         if (params.id == 'waiting') {
             var insArray_1 = new Array();
@@ -164,8 +202,8 @@ router.get('/groupstatus/detail/:id', async (req, res) => {
                 }
             });
             dataSet = {
-                host : insArray_1,
-                join : insArray_2
+                host: insArray_1,
+                join: insArray_2
             }
         } else if (params.id == 'ongoing') {
             var insArray_1 = new Array();
@@ -182,8 +220,8 @@ router.get('/groupstatus/detail/:id', async (req, res) => {
                 }
             });
             dataSet = {
-                host : insArray_1,
-                join : insArray_2
+                host: insArray_1,
+                join: insArray_2
             }
         } else if (params.id == 'done') {
             var insArray_1 = new Array();
@@ -200,8 +238,8 @@ router.get('/groupstatus/detail/:id', async (req, res) => {
                 }
             });
             dataSet = {
-                host : insArray_1,
-                join : insArray_2
+                host: insArray_1,
+                join: insArray_2
             }
         }
         res.status(200).send(dataSet);
