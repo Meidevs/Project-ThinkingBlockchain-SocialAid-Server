@@ -140,13 +140,17 @@ class Groups {
                     var rawArray = new Array();
                     var resReturn = await myConnection.query('SELECT * FROM ts_participants WHERE groupsid = ?', [groupsid]);
                     var groupReturn = await myConnection.query('SELECT stc, period, date FROM ts_groups WHERE groupsid = ?', [groupsid]);
-                    var date = groupReturn[0].date.substring(0, 4) + '-' + groupReturn[0].date.substring(4, 6) + '-' + groupReturn[0].date.substring(6, 8) + ' 23:59:59'
+                    var date = new Date(groupReturn[0].date.substring(0, 4), groupReturn[0].date.substring(4, 6), groupReturn[0].date.substring(6, 8) + 15).toISOString().substring(0,10) + ' 23:59:59'
                     var totalSTC = parseInt(groupReturn[0].stc) * parseInt(groupReturn[0].period)
                     for (var i = 0; i < resReturn.length; i++) {
                         var userReturn = await myConnection.query('SELECT coin_wallet_address FROM tb_user_info WHERE user_seq = ?', [resReturn[i].userid]);
-                        rawArray.push({ coinWalletAddress: userReturn[0].coin_wallet_address, amount: totalSTC, partnerCode: 'TESTCODE', endDate: date })
+                        rawArray.push({ coinWalletAddress: userReturn[0].coin_wallet_address, amount: totalSTC, endDate: date })
                     }
-                    resolve(rawArray)
+		    var rawObj = new Object();
+		    rawObj.list = rawArray;
+		    rawObj.partnerCode = "TESTCODE";
+	            console.log('rawObj', rawObj);
+                    resolve(rawObj)
                 } catch (err) {
                     reject(err)
                 }
@@ -366,21 +370,16 @@ class Groups {
                         var rawObj = new Object();
                         var insA = await myConnection.query('SELECT coin_wallet_address FROM tb_user_info WHERE user_seq = ?', [resReturn[i].userid]);
                         var insB = await myConnection.query('SELECT stc, period, userid FROM ts_groups WHERE groupsid = ?', [resReturn[i].groupsid]);
-                        if (resReturn[i].userid == insB[0].userid) {
-                            rawObj.coinWalletAddress = insA[0].coin_wallet_address;
-                            rawObj.amount = (parseInt(insB[0].stc) * parseInt(insB[0].period) * 0.2) + (parseInt(insB[0].stc) * parseInt(insB[0].period) * 0.02);
-                            rawObj.partnerCode = 'TESTCODE';
-                            rawObj.endDate = date.substring(0,4) + '-' + date.substring(4,6) + '-' + date.substring(6,8) + ' 23:59:59';
-                        } else {
-                            rawObj.coinWalletAddress = insA[0].coin_wallet_address;
-                            rawObj.amount = (parseInt(insB[0].stc) * parseInt(insB[0].period) * 0.02);
-                            rawObj.partnerCode = 'TESTCODE';
-                            rawObj.endDate = date.substring(0,4) + '-' + date.substring(4,6) + '-' + date.substring(6,8) + ' 23:59:59';
-                        }
+                        rawObj.coinWalletAddress = insA[0].coin_wallet_address;
+                        rawObj.amount = (parseInt(insB[0].stc) * parseInt(insB[0].period));
+                        rawObj.endDate = date.substring(0,4) + '-' + date.substring(4,6) + '-' + date.substring(6,8) + ' 23:59:59';
                         rawArray.push(rawObj);
                     }
-                    console.log('GetParticipantsUserGroups', rawArray)
-                    resolve(rawArray)
+			var resObj = new Object();
+			resObj.list = rawArray;
+			resObj.partnerCode = "TESTCODE";
+                    console.log('GetParticipantsUserGroups', resObj)
+                    resolve(resObj)
                 } catch (err) {
                     reject(err)
                 }

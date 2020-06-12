@@ -15,7 +15,7 @@ cron.schedule("00 00 * * *", async () => {
     var dateString = await functions.DateCreator();
     var resUG = await groupModel.GetParticipantsUserGroups(dateString);
     console.log('resUG', resUG)
-    var unlockAPI =  await fetch('http://api.santavision.net/unlock', {
+    var unlockAPI =  await fetch('http://api.santavision.net:8500/unlock', {
       method : 'POST',
       headers : {
         'Content-Type' : 'application/json',
@@ -24,9 +24,9 @@ cron.schedule("00 00 * * *", async () => {
     });
 
     var ujson = await unlockAPI.json();
-
+	console.log('ujson', ujson)
     if (unlockAPI.ok) {
-      console.log('Unlock request Complete : ', ujson.result )
+      console.log('Unlock request Complete : ', ujson )
     }
 
     // Get Participants List From participants Table At Duedate.
@@ -49,7 +49,6 @@ cron.schedule("00 00 * * *", async () => {
           rawObj = {
             coinWalletAddress: null,
             amount: null,
-            partnerCode: 'TESTCODE'
           }
           if (data.userid == userArray[i].users[j].userid) {
             rawObj.coinWalletAddress = userArray[i].users[j].wallet
@@ -63,6 +62,7 @@ cron.schedule("00 00 * * *", async () => {
       }
     })
     console.log('apiArray', apiArray);
+
     // Transfer Wallet List to Santa. 
     // Transfer Wallet Addr to Santa Wallet API
     for (var i = 0; i < indexList.length; i++) {
@@ -78,16 +78,22 @@ cron.schedule("00 00 * * *", async () => {
       }
       rewardsArray.push(rawObj)
     }
+    var resObj = new Object();
+    resObj.list = apiArray;
+    resObj.partnerCode = "TESTCODE"    
 
-    var rewAPI = await fetch('http://api.santavision.net/compensation', {
+    console.log(resObj);
+    var rewAPI = await fetch('http://api.santavision.net:8500/compensation', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(apiArray)
+      body: JSON.stringify(resObj)
     });
 
     var json = await rewAPI.json();
+
+	console.log(json)
     if (rewAPI.ok) {
       console.log('Compensation Success : ', json.result)
       await rewardsModel.InsertRewards(rewardsArray);
