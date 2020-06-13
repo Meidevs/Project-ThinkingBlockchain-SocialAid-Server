@@ -69,15 +69,17 @@ router.get('/myinfo', async (req, res) => {
     var joinArray = new Array();
 
     // Get ableBalance From Santa API,
-    // let resBalance = await fetch('http://api.santavision.net/check/balance', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     body: JSON.stringify({ type: 'stc', address: wallet, pin: pin })
-    //   }
-    // })
-    // let json = await resBalance.json();
-
+    let resBalance = await fetch('http://api.santavision.net/check/balance', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        body: JSON.stringify({ type: 'stc', address: wallet, pin: pin })
+      }
+    })
+    let json = await resBalance.json();
+    if (resBalance.ok) {
+      console.log(json)
+    }
     var list = await groupModel.GetAllJoinedList(userid)
     console.log(list)
     for (var i = 0; i < list.length; i++) {
@@ -101,7 +103,7 @@ router.get('/myinfo', async (req, res) => {
         return (preValue + currentValue)
       });
 
-      var ableSTC = 1000;
+      var ableSTC = json.data.balance;
       var totalSTC = revSum + ableSTC;
       dataSet = {
         wallet: wallet,
