@@ -1,17 +1,24 @@
 var express = require('express');
 var router = express.Router();
 var fetch = require('node-fetch');
+var crypto = require('crypto');
+var btoa = require('btoa');
+
 var functions = require('../public/javascripts/functions/functions.js')
 var userModel = require('../public/javascripts/components/authModel.js');
 var groupModel = require('../public/javascripts/components/groupModel.js');
 
 router.post('/login', async (req, res, next) => {
   try {
+    var id = req.body.email;
+    var pw = req.body.password;
+    var base64String = await functions.PasswordEncryption(id, pw);
+
     // Get E-mail, password From Front-End
     var dataSet = new Object();
     dataSet = {
-      email: req.body.email,
-      password: req.body.password
+      email: id,
+      password: base64String,
     };
     resResult = await userModel.Login(dataSet);
 
@@ -59,11 +66,10 @@ router.get('/myinfo', async (req, res) => {
 
         if (joinArray[0] == undefined) {
 	  var ableSTC = json.data.currentCash;
-	  var totalSTC = 0;
           dataSet = {
             wallet: wallet,
             ableSTC: ableSTC,
-            totalSTC: totalSTC,
+            totalSTC: ableSTC,
             name: name
           }
 	} else {

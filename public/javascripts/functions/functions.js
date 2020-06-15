@@ -1,5 +1,21 @@
+var crypto = require('crypto');
+var btoa = require('btoa');
 
 class Functions {
+    PasswordEncryption (id, pw) {
+     return new Promise (
+      async (resolve, reject) => {
+       try {
+          var cryptoHash = crypto.createHash('sha256').update(id).update(pw).digest();
+          var base64String = await btoa(String.fromCharCode(...new Uint8Array(cryptoHash)));
+	  resolve(base64String);
+       } catch (err) {
+          reject(err) 
+       }
+      }
+     )
+    }
+
     EleminateMarks(data) {
         return new Promise(
             async (resolve, reject) => {
@@ -204,3 +220,4 @@ class Functions {
 
 
 module.exports = new Functions();
+

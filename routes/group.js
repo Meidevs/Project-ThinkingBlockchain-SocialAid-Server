@@ -8,6 +8,72 @@ var alarmModel = require('../public/javascripts/components/alarmModel.js');
 var functions = require('../public/javascripts/functions/functions.js');
 
 // Main Page LatestGroup, Search Group, MyGroup
+router.get('/instanceaction', async (req, res) => {
+    try {
+var apiArray = new Array();
+var listArray = new Array();
+var rewardsArray = new Array();
+var dateString = await functions.DateCreator();         
+      var resReturn = await groupModel.GetParticipantsListOfDate(dateString);
+    for (var i = 0; i < resReturn.length; i++) {
+      var groupsidList = resReturn[i].groupsid;
+      listArray.push(groupsidList)
+    }
+    // Remove Duplicate groupsid.
+    var indexList = listArray.filter((item, index) => listArray.indexOf(item) == index);
+    console.log('indexList', indexList);
+    // Host Reward 금액 & 계원 구분하여 데이터 형성
+    // indexList 로 Participants에서 userid 전체 호출
+    var hostArray = await groupModel.GetHostUserList(indexList);
+	console.log('hostArray', hostArray)
+    var userArray = await groupModel.GetUserList(indexList);
+	console.log('userArray', userArray);
+    hostArray.map((data) => {
+      for (var i = 0; i < userArray.length; i++) {
+        for (var j = 0; j < userArray[i].users.length; j++) {
+          var rawObj = new Object();
+          rawObj = {
+            coinWalletAddress: null,
+            amount: null,
+          }
+          if (data.groupsid == userArray[i].groupsid) {
+          if (data.userid == userArray[i].users[j].user_seq) {
+            rawObj.coinWalletAddress = userArray[i].users[j].coin_wallet_address;
+            rawObj.amount = parseInt(data.total) * 0.2 + parseInt(data.total) * 0.02;
+          } else {
+            rawObj.coinWalletAddress = userArray[i].users[j].coin_wallet_address;
+            rawObj.amount = parseInt(data.total) * 0.02;
+          }
+          apiArray.push(rawObj);
+          }
+        }
+      }
+    })
+    console.log('apiArray', apiArray);
+// Transfer Wallet List to Santa.
+    // Transfer Wallet Addr to Santa Wallet API
+    for (var i = 0; i < indexList.length; i++) {
+      rawObj = {
+        groupsid: null,
+        users: []
+      }
+      rawObj.groupsid = indexList[i]
+      for (var j = 0; j < resReturn.length; j++) {
+        if (indexList[i] == resReturn[j].groupsid) {
+          rawObj.users.push(resReturn[j].userid)
+        }
+      }
+      rewardsArray.push(rawObj)
+    }
+    var resObj = new Object();
+    resObj.list = apiArray;
+    resObj.partnerCode = "TESTCODE"
+
+    console.log(resObj);
+    } catch (err) {
+      console.log(err)
+    }
+})
 
 router.get('/grouplist', async (req, res) => {
     try {

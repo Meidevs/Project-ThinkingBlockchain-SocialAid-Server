@@ -1,4 +1,5 @@
 var cron = require('node-cron');
+var fetch = require('node-fetch');
 var groupModel = require('../public/javascripts/components/groupModel.js');
 var authModel = require('../public/javascripts/components/authModel.js');
 var rewardsModel = require('../public/javascripts/components/rewardModel.js');
@@ -7,14 +8,12 @@ var functions = require('../public/javascripts/functions/functions.js');
 cron.schedule("00 00 * * *", async () => {
   try {
     var returnArray = new Array();
-
     var apiArray = new Array();
     var listArray = new Array();
     var rewardsArray = new Array();
     var rawObj = new Object();
     var dateString = await functions.DateCreator();
     var resUG = await groupModel.GetParticipantsUserGroups(dateString);
-    console.log('resUG', resUG)
     var unlockAPI =  await fetch('http://api.santavision.net:8500/unlock', {
       method : 'POST',
       headers : {
@@ -29,7 +28,7 @@ cron.schedule("00 00 * * *", async () => {
       console.log('Unlock request Complete : ', ujson )
     }
 
-    // Get Participants List From participants Table At Duedate.
+    // Get Participants List (user_seq, groupsid, participantsid, duedate) From participants Table At Duedate.
     var resReturn = await groupModel.GetParticipantsListOfDate(dateString);
     for (var i = 0; i < resReturn.length; i++) {
       var groupsidList = resReturn[i].groupsid;
@@ -50,14 +49,16 @@ cron.schedule("00 00 * * *", async () => {
             coinWalletAddress: null,
             amount: null,
           }
-          if (data.userid == userArray[i].users[j].userid) {
-            rawObj.coinWalletAddress = userArray[i].users[j].wallet
+	  if (data.groupsid == userArray[i].groupsid) {
+          if (data.userid == userArray[i].users[j].user_seq) {
+            rawObj.coinWalletAddress = userArray[i].users[j].coin_wallet_address;
             rawObj.amount = parseInt(data.total) * 0.2 + parseInt(data.total) * 0.02;
           } else {
-            rawObj.coinWalletAddress = userArray[i].users[j].wallet
+            rawObj.coinWalletAddress = userArray[i].users[j].coin_wallet_address;
             rawObj.amount = parseInt(data.total) * 0.02;
           }
           apiArray.push(rawObj);
+          }
         }
       }
     })
@@ -93,12 +94,11 @@ cron.schedule("00 00 * * *", async () => {
 
     var json = await rewAPI.json();
 
-	console.log(json)
+	console.log('Compensations : ', json)
     if (rewAPI.ok) {
       console.log('Compensation Success : ', json.result)
       await rewardsModel.InsertRewards(rewardsArray);
     }
-
 
   } catch (err) {
     console.log(err)
