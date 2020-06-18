@@ -102,6 +102,7 @@ class Groups {
                         var story = await this.GetStories(resReturn[0].storyid);
 
                         rawObj.groupsid = resReturn[0].groupsid;
+			rawObj.userid = resReturn[0].userid;
                         rawObj.host = name;
                         rawObj.cates = cates;
                         rawObj.story = story;
@@ -140,7 +141,7 @@ class Groups {
                     var rawArray = new Array();
                     var resReturn = await myConnection.query('SELECT * FROM ts_participants WHERE groupsid = ?', [groupsid]);
                     var groupReturn = await myConnection.query('SELECT stc, period, date FROM ts_groups WHERE groupsid = ?', [groupsid]);
-                    var date = new Date(groupReturn[0].date.substring(0, 4), groupReturn[0].date.substring(4, 6), groupReturn[0].date.substring(6, 8) + 15).toISOString().substring(0,10) + ' 23:59:59'
+                    var date = new Date(parseInt(groupReturn[0].date.substring(0, 4)), parseInt(groupReturn[0].date.substring(4, 6)) - 1, parseInt(groupReturn[0].date.substring(6, 8)) + 15).toISOString().split('T')[0] + ' 23:59:59'
                     var totalSTC = parseInt(groupReturn[0].stc) * parseInt(groupReturn[0].period)
                     for (var i = 0; i < resReturn.length; i++) {
                         var userReturn = await myConnection.query('SELECT coin_wallet_address FROM tb_user_info WHERE user_seq = ?', [resReturn[i].userid]);
@@ -148,7 +149,7 @@ class Groups {
                     }
 		    var rawObj = new Object();
 		    rawObj.list = rawArray;
-		    rawObj.partnerCode = "TESTCODE";
+		    rawObj.partnerCode = "SOCIALADE";
 	            console.log('rawObj', rawObj);
                     resolve(rawObj)
                 } catch (err) {
@@ -377,7 +378,7 @@ class Groups {
                     }
 			var resObj = new Object();
 			resObj.list = rawArray;
-			resObj.partnerCode = "TESTCODE";
+			resObj.partnerCode = "SOCIALADE";
                     console.log('GetParticipantsUserGroups', resObj)
                     resolve(resObj)
                 } catch (err) {
@@ -424,7 +425,6 @@ class Groups {
             async (resolve, reject) => {
                 try {
                     var resReturn = await myConnection.query('SELECT duedate FROM ts_participants WHERE groupsid=?', [groupsid]);
-                    console.log(resReturn)
                     resolve(resReturn[0].duedate)
                 } catch (err) {
 
@@ -474,6 +474,18 @@ class Groups {
                 }
             }
         )
+    }
+    GetRateDate(userid, groupsid) {
+	return new Promise (
+		async (resolve, reject) => {
+			try {
+				var resReturn = await myConnection.query('SELECT ratedate FROM ts_participants WHERE userid = ? AND groupsid = ?', [userid, groupsid]);
+				resolve(resReturn[0].ratedate);
+			} catch (err) {
+				reject(err)
+			}
+		}
+	)
     }
 }
 

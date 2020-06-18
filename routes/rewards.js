@@ -30,13 +30,36 @@ router.get('/groupstatus', async (req, res) => {
             groupsidList.push(list[i].groupsid);
         }
         if (groupsidList[0] == null) {
+	    var now = new Date();
+            var yearArray = new Array();
+
+            var nowYear = now.getFullYear();
+            for (var i = nowYear - 3; i <= nowYear + 3; i++) {
+                var insObj = new Object();
+
+                insObj.year = i;
+                yearArray.push(insObj);
+
+            }
+            for (var i = 0; i < yearArray.length; i++) {
+                var rawArray = [];
+
+                for (var j = 1; j <= 12; j++) {
+                    rawArray.push({ month: j, total: 0 })
+                }
+                yearArray[i].month = rawArray
+            }
+
+            var annually = await functions.YearCalculator(yearArray);
+            var monthly = await functions.MonthCalculator(yearArray);
+
             dataSet.totalSTC = 0;
             dataSet.revenue = 0;
             dataSet.profit = 0;
             dataSet.repayment = 0;
             dataSet.count = 0;
-            dataSet.annually = [];
-            dataSet.monthly = [];
+            dataSet.annually = annually;
+            dataSet.monthly = monthly;
         } else {
             // Get All of STC From Groups Table & Sum All of STC.
             var stcReturn = await rewardsModel.GetAllSTC(groupsidList);
@@ -112,7 +135,7 @@ router.get('/groupstatus', async (req, res) => {
                 }
                 yearArray[i].month = rawArray
             }
-
+      	    
             yearArray.map((data) => {
                 for (var i = 0; i < mReturn.length; i++) {
                     if (data.year == mReturn[i].annually) {
@@ -124,8 +147,9 @@ router.get('/groupstatus', async (req, res) => {
                     }
                 }
             })
-            var annually = await functions.YearCalculator(yearArray)
-            var monthly = await functions.MonthCalculator(yearArray)
+            var annually = await functions.YearCalculator(yearArray);
+            var monthly = await functions.MonthCalculator(yearArray);
+
             dataSet.totalSTC = stcSum;
             dataSet.revenue = revSum;
             dataSet.profit = repSum;
@@ -229,6 +253,45 @@ router.get('/groupstatus/detail/:id', async (req, res) => {
         console.log(err)
         res.status(500).send(err)
     }
+});
+
+router.post('/getdetaildatas', async (req, res) => {
+	try {
+	var userid = req.session.user.userid;
+	var groupsid = req.body.groupsid;
+	var rawObj = new Object();	
+	var creator;
+	// Get All Group Datas From Group Model Module.
+	var resReturn = await groupModel.GetGroupdatas([groupsid]);
+	var resDueDate = await groupModel.GetDueDate(groupsid);
+	var resRateDate = await groupModel.GetRateDate(userid, groupsid);
+	var createdate = resReturn[0].date.substring(0,4) + '-' + resReturn[0].date.substring(4,6) + '-' + resReturn[0].date.substring(6,8);
+	var duedate = resDueDate.toISOString().substring(0,10);
+	var ratedate = resRateDate.toISOString().substring(0,10);
+	if (userid == resReturn[0].userid) {
+	creator = 1;
+	} else {
+	creator = 0;
+	}
+	rawObj = {
+		groupsid : resReturn[0].groupsid,
+		userid : resReturn[0].userid,
+		host : resReturn[0].host,
+		groupname : resReturn[0].groupname,
+		stc : resReturn[0].stc,
+		period : resReturn[0].period,
+		createdate : createdate,
+		status : resReturn[0].status,
+		duedate : duedate,
+		ratedate : ratedate,
+		creator : creator,
+	}
+	res.status(200).send(rawObj);
+
+	}
+	catch (err) {
+	res.status(500).send(err);
+	}
 })
 
 module.exports = router;

@@ -121,14 +121,10 @@ class User {
                     // Check Non-Exist User, Password Mismatch, Login Complete.
                     var flags;
                     var resObj = new Object();
-
                     var rawReturn = await myConnection.query('SELECT * FROM tb_user_info WHERE email = ?', [data.email]);
-			console.log(rawReturn[0]);	
                     if (rawReturn[0]) {
-			console.log('a')
                         var resReturn = await myConnection.query('SELECT * FROM tb_user_info WHERE email = ? AND passwd = ?', [data.email, data.password]);
-			console.log(resReturn[0])
-                        if (rawReturn[0]) {
+                        if (resReturn[0]) {
                             resObj = {
                                 flag: 0,
                                 dataSet: resReturn[0]

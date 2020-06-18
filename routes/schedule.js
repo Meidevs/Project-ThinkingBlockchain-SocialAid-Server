@@ -24,7 +24,7 @@ cron.schedule("00 00 * * *", async () => {
 
     var ujson = await unlockAPI.json();
 	console.log('ujson', ujson)
-    if (unlockAPI.ok) {
+    if (ujson.result == true) {
       console.log('Unlock request Complete : ', ujson )
     }
 
@@ -81,7 +81,7 @@ cron.schedule("00 00 * * *", async () => {
     }
     var resObj = new Object();
     resObj.list = apiArray;
-    resObj.partnerCode = "TESTCODE"    
+    resObj.partnerCode = "SOCIALADE"    
 
     console.log(resObj);
     var rewAPI = await fetch('http://api.santavision.net:8500/compensation', {
@@ -95,7 +95,7 @@ cron.schedule("00 00 * * *", async () => {
     var json = await rewAPI.json();
 
 	console.log('Compensations : ', json)
-    if (rewAPI.ok) {
+    if (json.result == true ) {
       console.log('Compensation Success : ', json.result)
       await rewardsModel.InsertRewards(rewardsArray);
     }
