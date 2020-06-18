@@ -122,25 +122,31 @@ class User {
                     var flags;
                     var resObj = new Object();
                     var rawReturn = await myConnection.query('SELECT * FROM tb_user_info WHERE email = ?', [data.email]);
-                    if (rawReturn[0]) {
-                        var resReturn = await myConnection.query('SELECT * FROM tb_user_info WHERE email = ? AND passwd = ?', [data.email, data.password]);
-                        if (resReturn[0]) {
-                            resObj = {
-                                flag: 0,
-                                dataSet: resReturn[0]
-                            }
-                        } else {
-                            resObj = {
-                                flag: 2,
-                                dataSet: null,
-                            }
-                        }
-                    } else {
-                        resObj = {
-                            flag: 1,
-                            dataSet: null,
-                        }
-                    }
+		    if (rawReturn[0]) {
+		       if (rawReturn[0].email == data.email) {
+				if (rawReturn[0].passwd == data.password) {
+				    resObj = {
+					flag : 0,
+					dataSet : rawReturn[0]
+				    }
+				} else {
+				    resObj = {
+					flag : 2,
+			  	    dataSet : null,
+				}
+			  }
+		       } else {
+			  resObj = {
+			     flag : 1,
+			     dataSet : null,
+			  }
+  		       }
+		    } else {
+			resObj = {
+			   flag : 1,
+			   dataSet : null,
+			}
+		    }
                     resolve(resObj);
                 } catch (err) {
                     reject(err)
@@ -148,7 +154,6 @@ class User {
             }
         )
     }
-
 }
 
 module.exports = new User;

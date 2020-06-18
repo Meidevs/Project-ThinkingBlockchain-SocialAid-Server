@@ -12,16 +12,23 @@ router.post('/login', async (req, res, next) => {
   try {
     var id = req.body.email;
     var pw = req.body.password;
-    var base64String = await functions.PasswordEncryption(id, pw);
+	console.log('id', id);
+	console.log('password', pw);
+
+    var rid = id.replace(/\s+/g,"");
+    var rpw = pw.replace(/\s+/g,"");
+
+
+    var base64String = await functions.PasswordEncryption(rid, rpw);
 
     // Get E-mail, password From Front-End
     var dataSet = new Object();
     dataSet = {
-      email: id,
+      email: rid,
       password: base64String,
     };
-    resResult = await userModel.Login(dataSet);
-
+    var resResult = await userModel.Login(dataSet);
+	console.log(resResult);
     // Insert Session Storage, E-mail, Name, Userid, Phone, wallet
     req.session.user = {
       userid: resResult.dataSet.user_seq,
