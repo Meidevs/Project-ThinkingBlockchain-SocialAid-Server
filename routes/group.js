@@ -430,7 +430,7 @@ router.post('/joingroup', async (req, res) => {
                 } 
             }
         }
-        res.status(200).send(resResulta);
+        res.status(200).send(resResult);
     } catch (err) {
         console.log(err)
         res.status(500).send(err)
