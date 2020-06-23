@@ -21,7 +21,7 @@ class User {
             async (resolve, reject) => {
                 try {
                     var rawReturn = await myConnection.query('SELECT userid FROM members WHERE name = ?', [data]);
-                    resolve(rawReturn.userid)
+                    resolve(rawReturn[0].userid)
                 } catch (err) {
                     reject(err)
                 }
@@ -119,16 +119,14 @@ class User {
             async (resolve, reject) => {
                 try {
                     // Check Non-Exist User, Password Mismatch, Login Complete.
-                    var flags;
                     var resObj = new Object();
-
                     var rawReturn = await myConnection.query('SELECT * FROM members WHERE email = ?', [data.email]);
                     if (rawReturn[0]) {
-                        rawReturn = await myConnection.query('SELECT * FROM members WHERE email = ? AND password = ?', [data.email, data.password])
-                        if (rawReturn[0]) {
+                        var resReturn = await myConnection.query('SELECT * FROM members WHERE email = ? AND password = ?', [data.email, data.password])
+                        if (resReturn[0]) {
                             resObj = {
                                 flag: 0,
-                                dataSet: rawReturn[0]
+                                dataSet: resReturn[0]
                             }
                         } else {
                             resObj = {
@@ -142,6 +140,7 @@ class User {
                             dataSet: null,
                         }
                     }
+                    console.log(resObj)
                     resolve(resObj);
                 } catch (err) {
                     reject(err)

@@ -93,23 +93,23 @@ class Groups {
                         var resReturn = await myConnection.query('SELECT * FROM groups WHERE groupsid = ?', [data[i]]);
 
                         // Get User's Name Using userid From memebers Table;
-                        var name = await userModel.GetName(resReturn[0].userid);
+                        var name = await userModel.GetName(resReturn[i].userid);
 
                         // Get Category's Name Using catesid From cates Table;
-                        var cates = await this.GetCates(resReturn[0].catesid);
+                        var cates = await this.GetCates(resReturn[i].catesid);
 
                         // Get Sentence Using storyid From story Table;
-                        var story = await this.GetStories(resReturn[0].storyid);
+                        var story = await this.GetStories(resReturn[i].storyid);
 
-                        rawObj.groupsid = resReturn[0].groupsid;
+                        rawObj.groupsid = resReturn[i].groupsid;
                         rawObj.host = name;
                         rawObj.cates = cates;
                         rawObj.story = story;
-                        rawObj.groupname = resReturn[0].groupname;
-                        rawObj.stc = resReturn[0].stc;
-                        rawObj.period = resReturn[0].period;
-                        rawObj.date = resReturn[0].date;
-                        rawObj.status = resReturn[0].status;
+                        rawObj.groupname = resReturn[i].groupname;
+                        rawObj.stc = resReturn[i].stc;
+                        rawObj.period = resReturn[i].period;
+                        rawObj.date = resReturn[i].date;
+                        rawObj.status = resReturn[i].status;
 
                         rawArray.push(JSON.parse(JSON.stringify(rawObj)))
                     }
@@ -219,34 +219,23 @@ class Groups {
         return new Promise(
             async (resolve, reject) => {
                 try {
-                    var rawObj = new Object();
                     var rawArray = new Array();
-
-                    rawObj = {
-                        groupsid: null,
-                        host: null,
-                        cates: null,
-                        story: null,
-                        groupname: null,
-                        stc: null,
-                        period: null,
-                    }
-
                     var resReturn = await this.GetAllStatusOn();
+                    console.log('a', resReturn)
                     for (var i = 0; i < resReturn.length; i++) {
+                        var rawObj = new Object();
                         var resultStory = await this.GetStories(resReturn[i].storyid)
                         var resultName = await userModel.GetName(resReturn[i].userid);
                         rawObj.groupsid = resReturn[i].groupsid,
-                            rawObj.groupname = resReturn[i].groupname,
-                            rawObj.host = resultName,
-                            rawObj.cates = resReturn[i].catesid,
-                            rawObj.story = resultStory,
-                            rawObj.stc = resReturn[i].stc,
-                            rawObj.period = resReturn[i].period,
-
-                            rawArray.push(JSON.parse(JSON.stringify(rawObj)))
+                        rawObj.groupname = resReturn[i].groupname,
+                        rawObj.host = resultName,
+                        rawObj.cates = resReturn[i].catesid,
+                        rawObj.story = resultStory,
+                        rawObj.stc = resReturn[i].stc,
+                        rawObj.period = resReturn[i].period,
+                        rawArray.push(rawObj);
                     }
-
+                    console.log
                     resolve(rawArray);
                 } catch (err) {
                     reject(err)
@@ -368,14 +357,14 @@ class Groups {
                         var insB = await myConnection.query('SELECT stc, period, userid FROM groups WHERE groupsid = ?', [resReturn[i].groupsid]);
                         if (resReturn[i].userid == insB[0].userid) {
                             rawObj.coinWalletAddress = insA[0].wallet;
-                            rawObj.amount = (parseInt(insB[0].stc) * parseInt(insB[0].period) * 0.2) + (parseInt(insB[0].stc) * parseInt(insB[0].period) * 0.02);
+                            rawObj.amount = (parseInt(insB[0].stc) * parseInt(insB[0].period) * 0.2);
                             rawObj.partnerCode = 'SOCIALADE';
-                            rawObj.endDate = date.substring(0,4) + '-' + date.substring(4,6) + '-' + date.substring(6,8) + ' 23:59:59';
+                            rawObj.endDate = date.substring(0, 4) + '-' + date.substring(4, 6) + '-' + date.substring(6, 8) + ' 23:59:59';
                         } else {
                             rawObj.coinWalletAddress = insA[0].wallet;
                             rawObj.amount = (parseInt(insB[0].stc) * parseInt(insB[0].period) * 0.02);
                             rawObj.partnerCode = 'SOCIALADE';
-                            rawObj.endDate = date.substring(0,4) + '-' + date.substring(4,6) + '-' + date.substring(6,8) + ' 23:59:59';
+                            rawObj.endDate = date.substring(0, 4) + '-' + date.substring(4, 6) + '-' + date.substring(6, 8) + ' 23:59:59';
                         }
                         rawArray.push(rawObj);
                     }

@@ -12,8 +12,8 @@ router.post('/login', async (req, res, next) => {
       email: req.body.email,
       password: req.body.password
     }
-    resResult = await userModel.Login(dataSet);
-
+    console.log(dataSet)
+    var resResult = await userModel.Login(dataSet);
     // Insert Session Storage, E-mail, Name, Userid, Phone, wallet
     req.session.user = {
       userid: resResult.dataSet.userid,
@@ -69,17 +69,17 @@ router.get('/myinfo', async (req, res) => {
     var joinArray = new Array();
 
     // Get ableBalance From Santa API,
-    let resBalance = await fetch('http://api.santavision.net/check/balance', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        body: JSON.stringify({ type: 'stc', address: wallet, pin: pin })
-      }
-    })
-    let json = await resBalance.json();
-    if (resBalance.ok) {
-      console.log(json)
-    }
+    // let resBalance = await fetch('http://api.santavision.net/check/balance', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     body: JSON.stringify({ type: 'stc', address: wallet, pin: pin })
+    //   }
+    // })
+    // let json = await resBalance.json();
+    // if (resBalance.ok) {
+    //   console.log(json)
+    // }
     var list = await groupModel.GetAllJoinedList(userid)
     console.log(list)
     for (var i = 0; i < list.length; i++) {
