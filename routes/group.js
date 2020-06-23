@@ -10,28 +10,28 @@ var functions = require('../public/javascripts/functions/functions.js');
 // Main Page LatestGroup, Search Group, MyGroup
 router.get('/instanceaction', async (req, res) => {
     try {
-	var returnArray = new Array();
-    var apiArray = new Array();
-    var listArray = new Array();
-    var rewardsArray = new Array();
-    var rawObj = new Object();
-    var dateString = await functions.DateCreator();
-    var resUG = await groupModel.GetParticipantsUserGroups(dateString);
-    var unlockAPI =  await fetch('http://api.santavision.net:8500/unlock', {
-      method : 'POST',
-      headers : {
-        'Content-Type' : 'application/json',
-      },
-      body : JSON.stringify(resUG)
-    });
+        var returnArray = new Array();
+        var apiArray = new Array();
+        var listArray = new Array();
+        var rewardsArray = new Array();
+        var rawObj = new Object();
+        var dateString = await functions.DateCreator();
+        var resUG = await groupModel.GetParticipantsUserGroups(dateString);
+        var unlockAPI = await fetch('http://api.santavision.net:8500/unlock', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(resUG)
+        });
 
-    var ujson = await unlockAPI.json();
+        var ujson = await unlockAPI.json();
         console.log('ujson', ujson)
-    if (ujson.result == true) {
-      console.log('Unlock request Complete : ', ujson )
-    }
+        if (ujson.result == true) {
+            console.log('Unlock request Complete : ', ujson)
+        }
     } catch (err) {
-      console.log(err)
+        console.log(err)
     }
 })
 
@@ -39,7 +39,7 @@ router.get('/grouplist', async (req, res) => {
     try {
         // Ask Database to Gather Every Group Lists that Value of Status Column is Zero.
         var resReturn = await groupModel.GetAllListOnStatus();
-	console.log(resReturn)
+        console.log(resReturn)
         res.status(200).send(resReturn)
     } catch (err) {
         console.log(err);
@@ -49,7 +49,7 @@ router.get('/grouplist', async (req, res) => {
 
 router.post('/creategroup', async (req, res) => {
     try {
-	var resResult = new Object();
+        var resResult = new Object();
         var userid = req.session.user.userid;
         var wallet = req.session.user.wallet;
         var pin = req.session.user.pin;
@@ -76,30 +76,30 @@ router.post('/creategroup', async (req, res) => {
             body: JSON.stringify({ type: 'stc', address: wallet, pin: pin })
         })
         let json = await resAPI.json();
-	console.log(json)
-	resResult = {
-	  flags : 2,
-	  message : '계모임 생성에 실패하였습니다'
-	}
+        console.log(json)
+        resResult = {
+            flags: 2,
+            message: '계모임 생성에 실패하였습니다'
+        }
         if (total <= json.data.currentCash) {
-	    var now = new Date();
+            var now = new Date();
             var year = now.getFullYear();
             var month = now.getMonth();
             var day = now.getDate();
             var dateString = new Date(year, month, day + 15).toISOString().split('T')[0];
-            var duedate = dateString  + ' 23:59:59';
-	    console.log(duedate)
-	    var sendObj = new Object();
-	    sendObj = {
-		list : [
-		   {
-		      coinWalletAddress : wallet,
-		      amount : total,
-		      endDate : duedate,
-		   }
-		],
-		partnerCode : 'SOCIALADE'
-	    }
+            var duedate = dateString + ' 23:59:59';
+            console.log(duedate)
+            var sendObj = new Object();
+            sendObj = {
+                list: [
+                    {
+                        coinWalletAddress: wallet,
+                        amount: total,
+                        endDate: duedate,
+                    }
+                ],
+                partnerCode: 'SOCIALADE'
+            }
             //After Receive Lock Up Complete Response
             var lockAPI = await fetch('http://api.santavision.net:8500/lock', {
                 method: 'POST',
@@ -109,23 +109,23 @@ router.post('/creategroup', async (req, res) => {
                 body: JSON.stringify(sendObj)
             });
 
-	    var lockJson = await lockAPI.json();
-	    console.log(lockJson)
+            var lockJson = await lockAPI.json();
+            console.log(lockJson)
             if (lockJson.result == true) {
-		var storyid = await groupModel.CreateNewStoried(req.body.story);
+                var storyid = await groupModel.CreateNewStoried(req.body.story);
                 dataSet.storyid = storyid;
-		await groupModel.CreateNewGroups(dataSet);
-		resResult = {
-		  flags : 1,
-		  message : '계모임을 생성하였습니다'
-		}
+                await groupModel.CreateNewGroups(dataSet);
+                resResult = {
+                    flags: 1,
+                    message: '계모임을 생성하였습니다'
+                }
             }
         } else {
-	  resResult = {
-	   flags : 0,
-	   message : '잔액이 부족합니다'
-	  }
-	}
+            resResult = {
+                flags: 0,
+                message: '잔액이 부족합니다'
+            }
+        }
         // Alarm
         // await alarmModel.ChangeAlarmStatus(dataSet.catesid, dataSet.userid, dataSet.stc);
 
@@ -240,29 +240,29 @@ router.post('/cancelgroup', async (req, res) => {
         // And Server will request Santa Wallet Server to Unlock specific Santa Wallet which Server ask to lock up
         var groupsid = req.body.groupsid;
         var userid = req.session.user.userid;
-	var resResult = false;
+        var resResult = false;
         // Paste Santa Wallet Unlock Request, Here
         var walletList = await groupModel.GetWalletList(groupsid);
 
-	var preJoined = await groupModel.GetParticipantsList(groupsid, userid);
-	if (preJoined.flags == 1) {
+        var preJoined = await groupModel.GetParticipantsList(groupsid, userid);
+        if (preJoined.flags == 1) {
 
-        var resAPI = await fetch('http://api.santavision.net:8500/unlock', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(walletList)
-        })
-        let json = await resAPI.json();
-        if (json.result == true) {
-            console.log('cancelgroup', json);
-            resResult = true;    
-	//After Getting Unlock Process is Complete, Server will Ask Database to Change Status of Groups Table & Remove the Tuple From Participants Table .
-            await groupModel.ChangeStatusDeprecated(groupsid);
-            await groupModel.RemoveTupleParticipantsList(groupsid);
+            var resAPI = await fetch('http://api.santavision.net:8500/unlock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(walletList)
+            })
+            let json = await resAPI.json();
+            if (json.result == true) {
+                console.log('cancelgroup', json);
+                resResult = true;
+                //After Getting Unlock Process is Complete, Server will Ask Database to Change Status of Groups Table & Remove the Tuple From Participants Table .
+                await groupModel.ChangeStatusDeprecated(groupsid);
+                await groupModel.RemoveTupleParticipantsList(groupsid);
+            }
         }
-	}
         res.status(200).send(resResult)
     } catch (err) {
         console.log(err);
@@ -277,34 +277,34 @@ router.post('/canceljoin', async (req, res) => {
         var rawArray = new Array();
         var resReturn = await groupModel.GetGroupdatas([groupsid])
         var wallet = await authModel.GetWallet(userid);
-        var endDate = new Date(parseInt(resReturn[0].date.substring(0, 4)), parseInt(resReturn[0].date.substring(4, 6)) - 1, parseInt(resReturn[0].date.substring(6, 8)) + 15 ).toISOString().split('T')[0] + ' 23:59:59';
+        var endDate = new Date(parseInt(resReturn[0].date.substring(0, 4)), parseInt(resReturn[0].date.substring(4, 6)) - 1, parseInt(resReturn[0].date.substring(6, 8)) + 15).toISOString().split('T')[0] + ' 23:59:59';
         var totalSTC = parseInt(resReturn[0].stc) * parseInt(resReturn[0].period);
-	var resResult = false;
-        rawArray.push({ coinWalletAddress: wallet, amount: totalSTC, endDate: endDate});
-	var resObj = new Object();
-	resObj.list = rawArray;
-	resObj.partnerCode = 'SOCIALADE';
+        var resResult = false;
+        rawArray.push({ coinWalletAddress: wallet, amount: totalSTC, endDate: endDate });
+        var resObj = new Object();
+        resObj.list = rawArray;
+        resObj.partnerCode = 'SOCIALADE';
 
-	console.log('resObj', resObj)
-	var preJoined = await groupModel.GetParticipantsList(groupsid, userid);
-	console.log('aa');
-	if (preJoined.flags == 1) {
-	console.log('b');
-        var resAPI = await fetch('http://api.santavision.net:8500/unlock', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(resObj)
-        })
-        let json = await resAPI.json();
+        console.log('resObj', resObj)
+        var preJoined = await groupModel.GetParticipantsList(groupsid, userid);
+        console.log('aa');
+        if (preJoined.flags == 1) {
+            console.log('b');
+            var resAPI = await fetch('http://api.santavision.net:8500/unlock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(resObj)
+            })
+            let json = await resAPI.json();
 
-        if (json.result == true) {
-            console.log('canceljoin', json.result);
-	    var resResult = true;
-            await groupModel.CancelJoin(groupsid, userid)	
-	}
-	}
+            if (json.result == true) {
+                console.log('canceljoin', json.result);
+                var resResult = true;
+                await groupModel.CancelJoin(groupsid, userid)
+            }
+        }
         res.status(200).send(resResult);
     } catch (err) {
         console.log(err)
@@ -318,114 +318,121 @@ router.post('/joingroup', async (req, res) => {
         var wallet = req.session.user.wallet;
         var pin = req.session.user.pin;
         var resResulta = false;
-	var resResult = new Object();
+        var resResult = new Object();
+        resResult = {
+            flags : 0,
+            message : '계모임 참가에 실패하였습니다'
+        }
+        // Get Participants List From ts_participants Table Using groupsid, userid 
+        // To Check user who request to join the group whether already joined or not.
+        var preJoined = await groupModel.GetParticipantsList(req.body.groupsid, userid);
 
-	// Get Participants List From ts_participants Table Using groupsid, userid 
-	// To Check user who request to join the group whether already joined or not.
-	var preJoined = await groupModel.GetParticipantsList(req.body.groupsid, userid);
-	if (preJoined.flags != 1) {
-        // Santa API Wallet Balance Check Request,
-        var resAPI = await fetch('http://api.santavision.net:8500/check/balance', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ type: 'stc', address: wallet, pin: pin })
-        })
-        let json = await resAPI.json();
-	console.log(json.data.currentCash)
-        if (json.result == true) {
-	    // Check Balnace Complete.
-	    // Put variable groupsid Into Array & Create dateString
-	    // dateString Which is used to communicate with Santa_Wallet API AS a Parameter 
+        if (preJoined.flags != 1) {
+            // Santa API Wallet Balance Check Request,
+            var resAPI = await fetch('http://api.santavision.net:8500/check/balance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ type: 'stc', address: wallet, pin: pin })
+            })
+            let json = await resAPI.json();
+            console.log('Able Balance : ', json.data.currentCash)
+            if (json.result == true) {
+                // Check Balnace Complete.
+                // Put variable groupsid Into Array & Create dateString
+                // dateString Which is used to communicate with Santa_Wallet API AS a Parameter 
 
-            var groupsid = [req.body.groupsid];
-            var period = await groupModel.GetGroupdatas(groupsid);
-            totalParticipants = period[0].period;
-            var total = parseInt(period[0].stc) * parseInt(period[0].period);
-	    console.log(total);
-            var year = parseInt(period[0].date.substring(0, 4));
-            var month = parseInt(period[0].date.substring(4, 6));
-            var day = parseInt(period[0].date.substring(6, 8));
-            var dateString = new Date(year, month - 1, day + 15).toISOString().split('T')[0];
-	    var endDate = dateString + " 23:59:59";
-            console.log('endDate', endDate)
+                var groupsid = [req.body.groupsid];
+                var period = await groupModel.GetGroupdatas(groupsid);
+                totalParticipants = period[0].period;
+                var total = parseInt(period[0].stc) * parseInt(period[0].period);
+                console.log(total);
+                var year = parseInt(period[0].date.substring(0, 4));
+                var month = parseInt(period[0].date.substring(4, 6));
+                var day = parseInt(period[0].date.substring(6, 8));
+                var dateString = new Date(year, month - 1, day + 15).toISOString().split('T')[0];
+                var endDate = dateString + " 23:59:59";
+                console.log('endDate', endDate)
 
-	    var sendObj = new Object();
-            sendObj = {
-                list : [
-                   {
-                      coinWalletAddress : wallet,
-                      amount : total,
-                      endDate : endDate,
-                   }
-                ],
-                partnerCode : 'SOCIALADE'
-            }
-	    console.log(sendObj);
-            if (total <= json.data.currentCash) {
-                let lockAPI = await fetch('http://api.santavision.net:8500/lock', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(sendObj)
-                })
-
-		var lockJson = await lockAPI.json();
-		console.log('mark lock', lockJson);
-                if (lockJson.result == true) {
-                    var count = await groupModel.ParticipantInGroup(groupsid, userid, totalParticipants);
-                    resResulta = true;
-
-		    // If Count == totalParticipants, Server Will INSERT 
-                    if (count == totalParticipants) {
-                        var walletList = await groupModel.GetWalletList(groupsid);
-                        var unlock_2 = await fetch('http://api.santavision.net:8500/unlock', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(walletList)
-                        })
-	   		var unlockJson = await unlock_2.json();
-
-			// Lock Again Complete Check
-			if(unlockJson.result == true) {
-			  var now = new Date();
-                          var a = new Date(now.getFullYear(), now.getMonth(), now.getDate() + totalParticipants);
-                          var yd = a.getFullYear();
-                          var md = a.getMonth() + 1;
-                          var dd = a.getDate();
-                          var duedate = yd + '-' + md + '-' + dd + ' 23:59:59';
-                          console.log('last duedate', duedate)
-                          for (var i = 0; i < walletList.list.length; i++) {
-                              walletList.list[i].endDate = duedate;
-                          }
-                          var locka = await fetch('http://api.santavision.net:8500/lock', {
-                              method: 'POST',
-                              headers: {
-                                  'Content-Type': 'application/json'
-                              },
-                              body: JSON.stringify(walletList)
-                          })
-                          resResulta = true;
-                          var lockaJson = await locka.json();
-                          console.log(lockaJson);
-                          if (lockaJson.result == true) {
-                            await groupModel.GroupsRun(groupsid, totalParticipants)
-                          }		
-			}
-                    }
+                var sendObj = new Object();
+                sendObj = {
+                    list: [
+                        {
+                            coinWalletAddress: wallet,
+                            amount: total,
+                            endDate: endDate,
+                        }
+                    ],
+                    partnerCode: 'SOCIALADE'
                 }
-            } else {
-                resResulta = false;
+                resResult = {
+                    flags : 1,
+                    message : '잔액이 부족합니다'
+                }
+                if (total <= json.data.currentCash) {
+                    let lockAPI = await fetch('http://api.santavision.net:8500/lock', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(sendObj)
+                    })
+
+                    var lockJson = await lockAPI.json();
+                    if (lockJson.result == true) {
+                        var count = await groupModel.ParticipantInGroup(groupsid, userid, totalParticipants);
+                        resResulta = true;
+                        resResult = {
+                            flags : 2,
+                            message : '계모임에 참가하셨습니다'
+                        }
+                        // If Count == totalParticipants, Server Will INSERT 
+                        if (count == totalParticipants) {
+                            var walletList = await groupModel.GetWalletList(groupsid);
+                            var unlock_2 = await fetch('http://api.santavision.net:8500/unlock', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(walletList)
+                            })
+                            var unlockJson = await unlock_2.json();
+
+                            // Lock Again Complete Check
+                            if (unlockJson.result == true) {
+                                var now = new Date();
+                                var a = new Date(now.getFullYear(), now.getMonth(), now.getDate() + totalParticipants);
+                                var yd = a.getFullYear();
+                                var md = a.getMonth() + 1;
+                                var dd = a.getDate();
+                                var duedate = yd + '-' + md + '-' + dd + ' 23:59:59';
+                                console.log('last duedate', duedate)
+                                for (var i = 0; i < walletList.list.length; i++) {
+                                    walletList.list[i].endDate = duedate;
+                                }
+                                var locka = await fetch('http://api.santavision.net:8500/lock', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(walletList)
+                                })
+                                resResulta = true;
+                                var lockaJson = await locka.json();
+                                console.log(lockaJson);
+                                if (lockaJson.result == true) {
+                                    await groupModel.GroupsRun(groupsid, totalParticipants)
+                                }
+                            }
+                        }
+                    }
+                } 
             }
         }
-}
         res.status(200).send(resResulta);
     } catch (err) {
-	console.log(err)
+        console.log(err)
         res.status(500).send(err)
     }
 });
