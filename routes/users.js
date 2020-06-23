@@ -12,12 +12,8 @@ router.post('/login', async (req, res, next) => {
   try {
     var id = req.body.email;
     var pw = req.body.password;
-	console.log('id', id);
-	console.log('password', pw);
-
     var rid = id.replace(/\s+/g,"");
     var rpw = pw.replace(/\s+/g,"");
-
 
     var base64String = await functions.PasswordEncryption(rid, rpw);
 
@@ -28,7 +24,6 @@ router.post('/login', async (req, res, next) => {
       password: base64String,
     };
     var resResult = await userModel.Login(dataSet);
-	console.log(resResult);
     // Insert Session Storage, E-mail, Name, Userid, Phone, wallet
     req.session.user = {
       userid: resResult.dataSet.user_seq,
@@ -39,10 +34,24 @@ router.post('/login', async (req, res, next) => {
       pin: resResult.dataSet.pin_no,
       currentCash : resResult.dataSet.current_cash
     }
-	console.log(req.session.user)
     res.status(200).send(resResult)
   } catch (err) {
     res.status(500).send(resResult)
+  }
+});
+
+router.post('/logout', async (req, res) => {
+  try {
+    if (req.session.user) {
+        req.session.destroy(err => {
+            console.log('failed: ' + err);
+            return;
+        });
+        console.log('success');
+        res.status(200).send(true);
+    } else return;
+  } catch (err) {
+    console.log(err);
   }
 });
 

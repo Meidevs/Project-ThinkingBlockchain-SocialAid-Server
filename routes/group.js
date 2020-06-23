@@ -49,6 +49,7 @@ router.get('/grouplist', async (req, res) => {
 
 router.post('/creategroup', async (req, res) => {
     try {
+	var resResult = new Object();
         var userid = req.session.user.userid;
         var wallet = req.session.user.wallet;
         var pin = req.session.user.pin;
@@ -76,14 +77,17 @@ router.post('/creategroup', async (req, res) => {
         })
         let json = await resAPI.json();
 	console.log(json)
+	resResult = {
+	  flags : 2,
+	  message : '계모임 생성에 실패하였습니다'
+	}
         if (total <= json.data.currentCash) {
-
-		var now = new Date();
-        	var year = now.getFullYear();
-        	var month = now.getMonth();
-        	var day = now.getDate();
-		var dateString = new Date(year, month, day + 15).toISOString().split('T')[0];
-        	var duedate = dateString  + ' 23:59:59';
+	    var now = new Date();
+            var year = now.getFullYear();
+            var month = now.getMonth();
+            var day = now.getDate();
+            var dateString = new Date(year, month, day + 15).toISOString().split('T')[0];
+            var duedate = dateString  + ' 23:59:59';
 	    console.log(duedate)
 	    var sendObj = new Object();
 	    sendObj = {
@@ -111,8 +115,17 @@ router.post('/creategroup', async (req, res) => {
 		var storyid = await groupModel.CreateNewStoried(req.body.story);
                 dataSet.storyid = storyid;
 		await groupModel.CreateNewGroups(dataSet);
+		resResult = {
+		  flags : 1,
+		  message : '계모임을 생성하였습니다'
+		}
             }
-        }
+        } else {
+	  resResult = {
+	   flags : 0,
+	   message : '잔액이 부족합니다'
+	  }
+	}
         // Alarm
         // await alarmModel.ChangeAlarmStatus(dataSet.catesid, dataSet.userid, dataSet.stc);
 
@@ -304,12 +317,13 @@ router.post('/joingroup', async (req, res) => {
         var userid = req.session.user.userid;
         var wallet = req.session.user.wallet;
         var pin = req.session.user.pin;
-        var resResult = false;
+        var resResulta = false;
+	var resResult = new Object();
+
+	// Get Participants List From ts_participants Table Using groupsid, userid 
+	// To Check user who request to join the group whether already joined or not.
 	var preJoined = await groupModel.GetParticipantsList(req.body.groupsid, userid);
-	console.log('aa');
 	if (preJoined.flags != 1) {
-	console.log('b');
-	
         // Santa API Wallet Balance Check Request,
         var resAPI = await fetch('http://api.santavision.net:8500/check/balance', {
             method: 'POST',
@@ -321,6 +335,10 @@ router.post('/joingroup', async (req, res) => {
         let json = await resAPI.json();
 	console.log(json.data.currentCash)
         if (json.result == true) {
+	    // Check Balnace Complete.
+	    // Put variable groupsid Into Array & Create dateString
+	    // dateString Which is used to communicate with Santa_Wallet API AS a Parameter 
+
             var groupsid = [req.body.groupsid];
             var period = await groupModel.GetGroupdatas(groupsid);
             totalParticipants = period[0].period;
@@ -358,7 +376,9 @@ router.post('/joingroup', async (req, res) => {
 		console.log('mark lock', lockJson);
                 if (lockJson.result == true) {
                     var count = await groupModel.ParticipantInGroup(groupsid, userid, totalParticipants);
-                    resResult = true;
+                    resResulta = true;
+
+		    // If Count == totalParticipants, Server Will INSERT 
                     if (count == totalParticipants) {
                         var walletList = await groupModel.GetWalletList(groupsid);
                         var unlock_2 = await fetch('http://api.santavision.net:8500/unlock', {
@@ -369,6 +389,8 @@ router.post('/joingroup', async (req, res) => {
                             body: JSON.stringify(walletList)
                         })
 	   		var unlockJson = await unlock_2.json();
+
+			// Lock Again Complete Check
 			if(unlockJson.result == true) {
 			  var now = new Date();
                           var a = new Date(now.getFullYear(), now.getMonth(), now.getDate() + totalParticipants);
@@ -387,7 +409,7 @@ router.post('/joingroup', async (req, res) => {
                               },
                               body: JSON.stringify(walletList)
                           })
-                          resResult = true;
+                          resResulta = true;
                           var lockaJson = await locka.json();
                           console.log(lockaJson);
                           if (lockaJson.result == true) {
@@ -397,11 +419,11 @@ router.post('/joingroup', async (req, res) => {
                     }
                 }
             } else {
-                resResult = false;
+                resResulta = false;
             }
         }
 }
-        res.status(200).send(resResult);
+        res.status(200).send(resResulta);
     } catch (err) {
 	console.log(err)
         res.status(500).send(err)

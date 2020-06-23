@@ -22,8 +22,12 @@ const FileStore = require('session-file-store')(session);
 app.use(session({
   secret: 'keyboard cat',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
+  rolling : true,
   store: new FileStore(),
+  cookie : {
+   maxAge: 2592000000,
+  }
 }));
 
 // view engine setup
