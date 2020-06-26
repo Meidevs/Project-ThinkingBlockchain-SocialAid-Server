@@ -1,4 +1,4 @@
-// var myConnection = require('../../../dbConfig.js');
+
 var myConnection = require('../../../mdbConfig.js');
 var functions = require('../functions/functions.js');
 
