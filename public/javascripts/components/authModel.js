@@ -21,7 +21,7 @@ class User {
             async (resolve, reject) => {
                 try {
                     var rawReturn = await myConnection.query('SELECT user_seq FROM tb_user_info WHERE name = ?', [data]);
-                    resolve(rawReturn.user_seq)
+                    resolve(rawReturn[0].user_seq)
                 } catch (err) {
                     reject(err)
                 }
