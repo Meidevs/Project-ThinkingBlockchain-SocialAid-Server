@@ -36,7 +36,7 @@ router.post('/login', async (req, res, next) => {
     }
     res.status(200).send(resResult)
   } catch (err) {
-    res.status(500).send(resResult)
+    console.log(err);
   }
 });
 

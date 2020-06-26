@@ -10,26 +10,26 @@ var functions = require('../public/javascripts/functions/functions.js');
 // Main Page LatestGroup, Search Group, MyGroup
 router.get('/instanceaction', async (req, res) => {
     try {
-	var returnArray = new Array();
-    var apiArray = new Array();
-    var listArray = new Array();
-    var rewardsArray = new Array();
-    var rawObj = new Object();
-    var dateString = await functions.DateCreator();
-    var resUG = await groupModel.GetParticipantsUserGroups(dateString);
-    var unlockAPI =  await fetch('http://api.santavision.net:8500/unlock', {
-      method : 'POST',
-      headers : {
-        'Content-Type' : 'application/json',
-      },
-      body : JSON.stringify(resUG)
-    });
+//	var returnArray = new Array();
+//    var apiArray = new Array();
+//    var listArray = new Array();
+//    var rewardsArray = new Array();
+//    var rawObj = new Object();
+//    var dateString = await functions.DateCreator();
+//    var resUG = await groupModel.GetParticipantsUserGroups(dateString);
+//    var unlockAPI =  await fetch('http://api.santavision.net:8500/unlock', {
+//      method : 'POST',
+//      headers : {
+//        'Content-Type' : 'application/json',
+//      },
+//      body : JSON.stringify(resUG)
+//    });
 
-    var ujson = await unlockAPI.json();
-        console.log('ujson', ujson)
-    if (ujson.result == true) {
-      console.log('Unlock request Complete : ', ujson )
-    }
+//    var ujson = await unlockAPI.json();
+//        console.log('ujson', ujson)
+//    if (ujson.result == true) {
+//      console.log('Unlock request Complete : ', ujson )
+//    }
     } catch (err) {
       console.log(err)
     }
@@ -319,7 +319,10 @@ router.post('/joingroup', async (req, res) => {
         var pin = req.session.user.pin;
         var resResulta = false;
 	var resResult = new Object();
-
+	resResult = {
+	   flags : 0,
+	   message : '계모임 참가에 실패하였습니다'
+	{
 	// Get Participants List From ts_participants Table Using groupsid, userid 
 	// To Check user who request to join the group whether already joined or not.
 	var preJoined = await groupModel.GetParticipantsList(req.body.groupsid, userid);
@@ -363,6 +366,10 @@ router.post('/joingroup', async (req, res) => {
                 partnerCode : 'SOCIALADE'
             }
 	    console.log(sendObj);
+	    resResult = {
+		flags : 1,
+		message : '잔액이 부족합니다'
+	    }
             if (total <= json.data.currentCash) {
                 let lockAPI = await fetch('http://api.santavision.net:8500/lock', {
                     method: 'POST',
@@ -377,7 +384,10 @@ router.post('/joingroup', async (req, res) => {
                 if (lockJson.result == true) {
                     var count = await groupModel.ParticipantInGroup(groupsid, userid, totalParticipants);
                     resResulta = true;
-
+		    resResult = {
+			flags : 2,
+			message : '계모임에 참가하셨습니다'
+		    }
 		    // If Count == totalParticipants, Server Will INSERT 
                     if (count == totalParticipants) {
                         var walletList = await groupModel.GetWalletList(groupsid);
@@ -409,7 +419,7 @@ router.post('/joingroup', async (req, res) => {
                               },
                               body: JSON.stringify(walletList)
                           })
-                          resResulta = true;
+                          
                           var lockaJson = await locka.json();
                           console.log(lockaJson);
                           if (lockaJson.result == true) {
@@ -418,12 +428,10 @@ router.post('/joingroup', async (req, res) => {
 			}
                     }
                 }
-            } else {
-                resResulta = false;
-            }
+            } 
+	  }
         }
-}
-        res.status(200).send(resResulta);
+        res.status(200).send(resResult);
     } catch (err) {
 	console.log(err)
         res.status(500).send(err)
