@@ -10,26 +10,26 @@ var functions = require('../public/javascripts/functions/functions.js');
 // Main Page LatestGroup, Search Group, MyGroup
 router.get('/instanceaction', async (req, res) => {
     try {
-        var returnArray = new Array();
-        var apiArray = new Array();
-        var listArray = new Array();
-        var rewardsArray = new Array();
-        var rawObj = new Object();
-        var dateString = await functions.DateCreator();
-        var resUG = await groupModel.GetParticipantsUserGroups(dateString);
-        var unlockAPI = await fetch('http://api.santavision.net:8500/unlock', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(resUG)
-        });
+//        var returnArray = new Array();
+//       var apiArray = new Array();
+//        var listArray = new Array();
+//        var rewardsArray = new Array();
+//        var rawObj = new Object();
+//        var dateString = await functions.DateCreator();
+//        var resUG = await groupModel.GetParticipantsUserGroups(dateString);
+//        var unlockAPI = await fetch('http://api.santavision.net:8500/unlock', {
+//            method: 'POST',
+//            headers: {
+//                'Content-Type': 'application/json',
+//            },
+//            body: JSON.stringify(resUG)
+//        });
 
-        var ujson = await unlockAPI.json();
-        console.log('ujson', ujson)
-        if (ujson.result == true) {
-            console.log('Unlock request Complete : ', ujson)
-        }
+//        var ujson = await unlockAPI.json();
+//        console.log('ujson', ujson)
+//        if (ujson.result == true) {
+//            console.log('Unlock request Complete : ', ujson)
+//        }
     } catch (err) {
         console.log(err)
     }
@@ -129,10 +129,9 @@ router.post('/creategroup', async (req, res) => {
         // Alarm
         // await alarmModel.ChangeAlarmStatus(dataSet.catesid, dataSet.userid, dataSet.stc);
 
-        res.status(200).send(true)
+        res.status(200).send(resResult)
     } catch (err) {
         console.log(err)
-        res.status(500).send(false)
     }
 });
 
