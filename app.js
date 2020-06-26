@@ -4,15 +4,13 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var logger = require('morgan');
-var helmet = require('helmet');
+
 var groupRouter = require('./routes/group');
 var usersRouter = require('./routes/users');
 var rewardsRouter = require('./routes/rewards');
 var cron = require('./routes/schedule');
 
 var app = express();
-app.use(helmet());
-
 // Sessions
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);

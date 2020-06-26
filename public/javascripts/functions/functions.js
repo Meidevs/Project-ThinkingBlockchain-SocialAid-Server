@@ -107,7 +107,6 @@ class Functions {
                 try {
                     var rawArray = new Array();
                     var cnt = 0;
-
                     for (var key in filter) {
                         if (filter[key] != null) {
                             cnt += 1;
@@ -122,7 +121,7 @@ class Functions {
                             });
                             break;
                         case 2:
-                            var datas = data.filter(item => {
+                            data.filter(item => {
                                 if (item.catesid != filter.catesid && item.userid == filter.userid && item.groupname == filter.groupname) {
                                     rawArray.push(item.groupsid);
                                 } else if (item.catesid == filter.catesid && item.userid != filter.userid && item.groupname == filter.groupname) {
@@ -133,7 +132,7 @@ class Functions {
                             });
                             break;
                         case 1:
-                            var datas = data.filter(item => {
+                            data.filter(item => {
                                 if (item.catesid == filter.catesid) {
                                     rawArray.push(item.groupsid);
                                 } else if (item.userid == filter.userid) {

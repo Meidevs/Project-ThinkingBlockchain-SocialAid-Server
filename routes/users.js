@@ -25,18 +25,18 @@ router.post('/login', async (req, res, next) => {
     };
     var resResult = await userModel.Login(dataSet);
     // Insert Session Storage, E-mail, Name, Userid, Phone, wallet
-    req.session.user = {
-      userid: resResult.dataSet.user_seq,
-      email: resResult.dataSet.email,
-      name: resResult.dataSet.name,
-      phone: resResult.dataSet.phone_number,
-      wallet: resResult.dataSet.coin_wallet_address,
-      pin: resResult.dataSet.pin_no,
-      currentCash : resResult.dataSet.current_cash
-    }
-    res.status(200).send(resResult)
+	req.session.user = {
+        userid: resResult.dataSet.user_seq,
+        email: resResult.dataSet.email,
+        name: resResult.dataSet.name,
+        phone: resResult.dataSet.phone_number,
+        wallet: resResult.dataSet.coin_wallet_address,
+        pin: resResult.dataSet.pin_no,
+        currentCash : resResult.dataSet.current_cash
+      } 
+    res.status(200).send(resResult);
   } catch (err) {
-    console.log(err);
+    res.status(500).send(resResult);
   }
 });
 
