@@ -138,9 +138,9 @@ router.post('/creategroup', async (req, res) => {
 router.post('/search', async (req, res) => {
     try {
         // Receive Catesid, Hostname, Groupname From Front-End
-        var reqCode;
-        var reqCates;
-        var reqGroups;
+        var reqCode = null;
+        var reqCates = null;
+        var reqGroups = null;
         var dataSet = new Object();
         var rawArray = new Array();
 
@@ -151,10 +151,14 @@ router.post('/search', async (req, res) => {
         } else {
             reqCode = null;
         }
-
+	if (reqCates = 'cates') {
+	    reqCates = null
+	}
         reqCates = req.body.catesid;
         reqGroups = req.body.groupname;
-
+	console.log('reqCode', reqCode);
+	console.log('reqCates', reqCates);
+	console.log('reqGroups',reqGroups);
         dataSet = {
             catesid: reqCates,
             userid: reqCode,
@@ -169,7 +173,7 @@ router.post('/search', async (req, res) => {
 
         // SearchBox Component receive rawArray Which Arranged to Make JSON Structure & dataSet Which Act Like Filter is the Data From Front-End
         var resSearch = await functions.SearchBox(rawArray, dataSet);
-
+	console.log(resSearch);
         var resReturn = await groupModel.GetGroupdatas(resSearch)
         res.status(200).send(resReturn)
     } catch (err) {
