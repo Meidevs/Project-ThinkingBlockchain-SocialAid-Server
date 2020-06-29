@@ -102,7 +102,7 @@ class Groups {
                         var story = await this.GetStories(resReturn[0].storyid);
 
                         rawObj.groupsid = resReturn[0].groupsid;
-			rawObj.userid = resReturn[0].userid;
+                        rawObj.userid = resReturn[0].userid;
                         rawObj.host = name;
                         rawObj.cates = cates;
                         rawObj.story = story;
@@ -134,6 +134,22 @@ class Groups {
             }
         )
     }
+
+    ChangeStatusDeprecatedArray(data) {
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    console.log('datadata', data)
+                    for (var i = 0; i < data.length; i++) {
+                        await myConnection.query('UPDATE ts_groups SET status=999 WHERE groupsid = ?', [data[i].groupsid]);
+                    }
+                    resolve(true)
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
     GetWalletList(groupsid) {
         return new Promise(
             async (resolve, reject) => {
@@ -147,10 +163,10 @@ class Groups {
                         var userReturn = await myConnection.query('SELECT coin_wallet_address FROM tb_user_info WHERE user_seq = ?', [resReturn[i].userid]);
                         rawArray.push({ coinWalletAddress: userReturn[0].coin_wallet_address, amount: totalSTC, endDate: date })
                     }
-		    var rawObj = new Object();
-		    rawObj.list = rawArray;
-		    rawObj.partnerCode = "SOCIALADE";
-	            console.log('rawObj', rawObj);
+                    var rawObj = new Object();
+                    rawObj.list = rawArray;
+                    rawObj.partnerCode = "SOCIALADE";
+                    console.log('rawObj', rawObj);
                     resolve(rawObj)
                 } catch (err) {
                     reject(err)
@@ -171,7 +187,21 @@ class Groups {
             }
         )
     }
-
+    RemoveTupleParticipantsArray(data) {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    console.log(data)
+                    for (var i = 0; i < data.length; i++)  {
+                        await myConnection.query('UPDATE ts_participants SET groupsid = "G999999", userid = "U999999" WHERE groupsid = ?', [data[i].groupsid]);
+                    }
+                    resolve(true);
+                } catch (err) {
+                    reject(err);
+                }
+            }
+        )
+    }
     CreateNewStoried(data) {
         return new Promise(
             async (resolve, reject) => {
@@ -373,12 +403,12 @@ class Groups {
                         var insB = await myConnection.query('SELECT stc, period, userid FROM ts_groups WHERE groupsid = ?', [resReturn[i].groupsid]);
                         rawObj.coinWalletAddress = insA[0].coin_wallet_address;
                         rawObj.amount = (parseInt(insB[0].stc) * parseInt(insB[0].period));
-                        rawObj.endDate = date.substring(0,4) + '-' + date.substring(4,6) + '-' + date.substring(6,8) + ' 23:59:59';
+                        rawObj.endDate = date.substring(0, 4) + '-' + date.substring(4, 6) + '-' + date.substring(6, 8) + ' 23:59:59';
                         rawArray.push(rawObj);
                     }
-			var resObj = new Object();
-			resObj.list = rawArray;
-			resObj.partnerCode = "SOCIALADE";
+                    var resObj = new Object();
+                    resObj.list = rawArray;
+                    resObj.partnerCode = "SOCIALADE";
                     console.log('GetParticipantsUserGroups', resObj)
                     resolve(resObj)
                 } catch (err) {
@@ -476,16 +506,28 @@ class Groups {
         )
     }
     GetRateDate(userid, groupsid) {
-	return new Promise (
-		async (resolve, reject) => {
-			try {
-				var resReturn = await myConnection.query('SELECT ratedate FROM ts_participants WHERE userid = ? AND groupsid = ?', [userid, groupsid]);
-				resolve(resReturn[0].ratedate);
-			} catch (err) {
-				reject(err)
-			}
-		}
-	)
+        return new Promise(
+            async (resolve, reject) => {
+                try {
+                    var resReturn = await myConnection.query('SELECT ratedate FROM ts_participants WHERE userid = ? AND groupsid = ?', [userid, groupsid]);
+                    resolve(resReturn[0].ratedate);
+                } catch (err) {
+                    reject(err)
+                }
+            }
+        )
+    }
+    SelectAllParticipants() {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    var resReturn = await myConnection.query('SELECT * FROM ts_participants WHERE groupsid NOT IN ("G999999", "G000000")');
+                    resolve(resReturn);
+                } catch (err) {
+                    reject(err);
+                } 
+            }
+        )
     }
 }
 
