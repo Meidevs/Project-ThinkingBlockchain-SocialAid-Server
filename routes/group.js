@@ -30,6 +30,16 @@ router.get('/instanceaction', async (req, res) => {
 //        if (ujson.result == true) {
 //            console.log('Unlock request Complete : ', ujson)
 //        }
+//	var resAPI = await fetch('http://api.santavision.net:8500/check/balance', {
+//           method: 'POST',
+//            headers: {
+//                'Content-Type': 'application/json',
+//            },
+//            body: JSON.stringify({ type: 'stc', address: 'SYrmBaXMCkWBBfruKS3iWVC4rAnqoejSer', pin: 1004 })
+//        })
+//        let json = await resAPI.json();
+//        console.log('Able Balance : ', json)
+//	res.status(200).send(json);
     } catch (err) {
         console.log(err)
     }
