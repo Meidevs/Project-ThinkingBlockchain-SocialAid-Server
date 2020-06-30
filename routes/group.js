@@ -10,26 +10,30 @@ var functions = require('../public/javascripts/functions/functions.js');
 // Main Page LatestGroup, Search Group, MyGroup
 router.get('/instanceaction', async (req, res) => {
     try {
-//        var returnArray = new Array();
-//       var apiArray = new Array();
-//        var listArray = new Array();
-//        var rewardsArray = new Array();
-//        var rawObj = new Object();
-//        var dateString = await functions.DateCreator();
-//        var resUG = await groupModel.GetParticipantsUserGroups(dateString);
-//        var unlockAPI = await fetch('http://api.santavision.net:8500/unlock', {
-//            method: 'POST',
-//            headers: {
-//                'Content-Type': 'application/json',
-//            },
-//            body: JSON.stringify(resUG)
-//        });
+        //        var returnArray = new Array();
+        //       var apiArray = new Array();
+        //        var listArray = new Array();
+        //        var rewardsArray = new Array();
+        //        var rawObj = new Object();
+        //        var dateString = await functions.DateCreator();
+        //        var resUG = await groupModel.GetParticipantsUserGroups(dateString);
+        //        var unlockAPI = await fetch('http://api.santavision.net:8500/unlock', {
+        //            method: 'POST',
+        //            headers: {
+        //                'Content-Type': 'application/json',
+        //            },
+        //            body: JSON.stringify(resUG)
+        //        });
 
-//        var ujson = await unlockAPI.json();
-//        console.log('ujson', ujson)
-//        if (ujson.result == true) {
-//            console.log('Unlock request Complete : ', ujson)
-//        }
+        //        var ujson = await unlockAPI.json();
+        //        console.log('ujson', ujson)
+        //        if (ujson.result == true) {
+        //            console.log('Unlock request Complete : ', ujson)
+        //        }
+        // var dateString = await functions.DateCreator();
+        // console.log('dateString', dateString)
+
+        
     } catch (err) {
         console.log(err)
     }
@@ -151,14 +155,14 @@ router.post('/search', async (req, res) => {
         } else {
             reqCode = null;
         }
-	if (reqCates = 'cates') {
-	    reqCates = null
-	}
+        if (reqCates = 'cates') {
+            reqCates = null
+        }
         reqCates = req.body.catesid;
         reqGroups = req.body.groupname;
-	console.log('reqCode', reqCode);
-	console.log('reqCates', reqCates);
-	console.log('reqGroups',reqGroups);
+        console.log('reqCode', reqCode);
+        console.log('reqCates', reqCates);
+        console.log('reqGroups', reqGroups);
         dataSet = {
             catesid: reqCates,
             userid: reqCode,
@@ -173,7 +177,7 @@ router.post('/search', async (req, res) => {
 
         // SearchBox Component receive rawArray Which Arranged to Make JSON Structure & dataSet Which Act Like Filter is the Data From Front-End
         var resSearch = await functions.SearchBox(rawArray, dataSet);
-	console.log(resSearch);
+        console.log(resSearch);
         var resReturn = await groupModel.GetGroupdatas(resSearch)
         res.status(200).send(resReturn)
     } catch (err) {
@@ -323,8 +327,8 @@ router.post('/joingroup', async (req, res) => {
         var resResulta = false;
         var resResult = new Object();
         resResult = {
-            flags : 0,
-            message : '계모임 참가에 실패하였습니다'
+            flags: 0,
+            message: '계모임 참가에 실패하였습니다'
         }
         // Get Participants List From ts_participants Table Using groupsid, userid 
         // To Check user who request to join the group whether already joined or not.
@@ -370,8 +374,8 @@ router.post('/joingroup', async (req, res) => {
                     partnerCode: 'SOCIALADE'
                 }
                 resResult = {
-                    flags : 1,
-                    message : '잔액이 부족합니다'
+                    flags: 1,
+                    message: '잔액이 부족합니다'
                 }
                 if (total <= json.data.currentCash) {
                     let lockAPI = await fetch('http://api.santavision.net:8500/lock', {
@@ -387,8 +391,8 @@ router.post('/joingroup', async (req, res) => {
                         var count = await groupModel.ParticipantInGroup(groupsid, userid, totalParticipants);
                         resResulta = true;
                         resResult = {
-                            flags : 2,
-                            message : '계모임에 참가하셨습니다'
+                            flags: 2,
+                            message: '계모임에 참가하셨습니다'
                         }
                         // If Count == totalParticipants, Server Will INSERT 
                         if (count == totalParticipants) {
@@ -430,7 +434,7 @@ router.post('/joingroup', async (req, res) => {
                             }
                         }
                     }
-                } 
+                }
             }
         }
         res.status(200).send(resResult);
