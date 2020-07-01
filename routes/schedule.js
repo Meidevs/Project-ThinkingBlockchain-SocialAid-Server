@@ -143,7 +143,7 @@ cron.schedule("00 00 * * *", async () => {
     All_Of_Users.map((data) => {
       for (var i = 0; i < Array_Before_UserWallet.length; i++) {
         if (data.user_seq == Array_Before_UserWallet[i].coinWalletAddress) {
-          Array_Before_UserWallet[i].coinWalletAddress = data.wallet;
+          Array_Before_UserWallet[i].coinWalletAddress = data.coin_wallet_address;
         }
       }
     })
