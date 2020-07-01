@@ -3,6 +3,7 @@
 
 <head>
     <title>OTC Buy</title>
+    <meta name="viewport" content="width=device-width,user-scalable=yes">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
         integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -95,7 +96,11 @@
                 'Content-Type' : 'application/json',
             },
             body : JSON.stringify({date : date, name : name, phone : phone, address : address, amount : amount, status : 0})
-        })
+        });
+	var json = await response.json();
+	if (response.ok) {
+	   location.reload();
+	}
     })
 </script>
 <style>
@@ -113,6 +118,7 @@
     .board-box {
         border: 1px solid #c3c3c3;
         margin: 2px;
+        font-size : 0.7em;
     }
 
     .content-title {

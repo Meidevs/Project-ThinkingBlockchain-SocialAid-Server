@@ -3,6 +3,7 @@
 
 <head>
   <title>OTC</title>
+  <meta name="viewport" content="width=device-width,user-scalable=yes">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
     integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -96,16 +97,21 @@
 
 <script>
   $(document).ready(async () => {
-    var response = await fetch('http://54.248.0.228:3000/otc/getlist', {
+    try {
+      var response = await fetch('http://54.248.0.228:3000/otc/getlist', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       }
     });
     var json = await response.json();
+    console.log(json);
     if (response.ok) {
       paging_1(json.sell, 10, 5, 1);
       paging_2(json.buy, 10, 5, 1);
+    }
+    } catch (err) {
+      console.log(err);
     }
   })
   Enroll_Sell = () => {
@@ -116,6 +122,9 @@
   }
 </script>
 <style>
+  html { 
+    -webkit-text-size-adjust: none; 
+  }
   .title {
     padding: 2em;
   }
@@ -168,6 +177,9 @@
   .pagination_2 {
     margin: 0;
     padding: 0;
+  }
+  .list {
+    font-size : 0.6em;
   }
 </style>
 

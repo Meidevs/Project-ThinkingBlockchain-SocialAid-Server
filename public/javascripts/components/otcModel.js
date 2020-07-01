@@ -18,8 +18,7 @@ class OTC {
         return new Promise (
             async (resolve, reject) => {
                 try {
-                    var List_Of_Tx = myConnection.query('SELECT * FROM ts_list');
-                    console.log(List_Of_Tx)
+                    var List_Of_Tx = await myConnection.query('SELECT DATE_FORMAT(date, "%Y-%m-%d") AS date, name, phonenumber, address, amount, status FROM ts_list');
                     resolve(List_Of_Tx);
                 } catch (err) {
                     reject(err)
