@@ -46,13 +46,13 @@ paging_1 = (total, dataPerPage, pageCount, currentPage) => {
         objCell_Name.innerHTML = total[i].name;
 
         var objCell_Phone = List_Of_Selling.insertCell();
-        objCell_Phone.innerHTML = total[i].phone;
+        objCell_Phone.innerHTML = total[i].phonenumber;
 
         var objCell_Address = List_Of_Selling.insertCell();
-        objCell_Address.innerHTML = total[i].wallet;
+        objCell_Address.innerHTML = total[i].address;
 
         var objCell_STC = List_Of_Selling.insertCell();
-        objCell_STC.innerHTML = total[i].stc;
+        objCell_STC.innerHTML = total[i].amount;
     }
 
     if (last < totalPage)

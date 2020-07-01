@@ -13,9 +13,11 @@ router.get('/getlist', async (req, res) => {
     var List_Of_Tx = await otcModel.GetOTCList();
     for (var i = 0; i < List_Of_Tx.length; i++) {
       if (List_Of_Tx[i].status == 0) {
+	List_Of_Tx[i].date = List_Of_Tx[i].date.substring(0,10);
         Sell_Array.push(List_Of_Tx[i]);
       }
       if (List_Of_Tx[i].status == 1) {
+	List_Of_Tx[i].date = List_Of_Tx[i].date.substring(0,10);
         Buy_Array.push(List_Of_Tx[i]);
       }
     }
@@ -42,7 +44,7 @@ router.post('/insertsell', async (req, res) => {
     dataSet = {
       date : req.body.date,
       name : req.body.name,
-      phonenumber : req.body.phonenumber,
+      phonenumber : req.body.phone,
       address : req.body.address,
       amount : req.body.amount,
       status : req.body.status,
@@ -59,7 +61,7 @@ router.post('/insertbuy', async (req, res) => {
     dataSet = {
       date : req.body.date,
       name : req.body.name,
-      phonenumber : req.body.phonenumber,
+      phonenumber : req.body.phone,
       address : req.body.address,
       amount : req.body.amount,
       status : req.body.status,
