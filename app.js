@@ -8,6 +8,7 @@ var logger = require('morgan');
 var groupRouter = require('./routes/group');
 var usersRouter = require('./routes/users');
 var rewardsRouter = require('./routes/rewards');
+var otcRouter = require('./routes/index');
 var cron = require('./routes/schedule');
 
 var app = express();
@@ -39,6 +40,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', groupRouter);
 app.use('/api/rewards', rewardsRouter);
 app.use('/api/users', usersRouter);
+app.use('/otc', otcRouter);
+
 // app.use(cron);
 
 // catch 404 and forward to error handler

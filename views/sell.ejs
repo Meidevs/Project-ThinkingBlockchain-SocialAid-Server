@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>OTC Buy</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <header class="align-center title">
+        <h3>STC 판매 등록창</h3>
+    </header>
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-md align-center board-box">
+                    <div class="col-12-sm">
+                        <div class="row justify-content-around">
+                            <div class="col-6-sm content-title">날짜</div>
+                            <div class="col-6-sm content-input">
+                                <div class="col-6-sm" id='date'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12-sm">
+                        <div class="row justify-content-around">
+                            <div class="col-6-sm content-title">이름</div>
+                            <div class="col-6-sm content-input">
+                                <input type='text' id='name' name='name' placeholder="김아무개">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12-sm">
+                        <div class="row justify-content-around">
+                            <div class="col-6-sm content-title">전화번호</div>
+                            <div class="col-6-sm content-input">
+                                <input type='text' id='phone' name='phone' placeholder="000-0000-0000">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12-sm">
+                        <div class="row justify-content-around">
+                            <div class="col-6-sm content-title">월렛주소</div>
+                            <div class="col-6-sm content-input">
+                                <input type='text' id='address' name='address' placeholder="OgVRvuATP1z7JjHLkuOU7Xw704">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12-sm">
+                        <div class="row justify-content-around">
+                            <div class="col-6-sm content-title">수량</div>
+                            <div class="col-6-sm content-input">
+                                <input type='text' id='amount' name='amount' placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12-sm btn-form">
+                        <input type='button' id='submit-btn' value='확인'>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</body>
+<script>
+    $(document).ready(() => {
+        var Date_Show = document.getElementById('date');
+        var now = new Date();
+        var year = now.getFullYear();
+        var month = now.getMonth() + 1;
+        var day = now.getDate();
+        var dateString = year + '-' + month + '-' + day;
+        Date_Show.innerHTML = dateString;
+    })
+
+    $('#submit-btn').click(async () => {
+        var date = document.getElementById('date').childNodes[0].data;
+        var name = document.getElementById('name').value;
+        var phone = document.getElementById('phone').value;
+        var address = document.getElementById('address').value;
+        var amount = document.getElementById('amount').value;
+        var response = await fetch('http://54.248.0.228:3000/otc/insertsell', {
+            method : 'POST',
+            headers : {
+                'Content-Type' : 'application/json',
+            },
+            body : JSON.stringify({date : date, name : name, phone : phone, address : address, amount : amount, status : 0})
+        })
+    })
+</script>
+<style>
+    .title {
+        padding: 2em;
+    }
+
+    .align-center {
+        display: grid;
+        flex-wrap: wrap;
+        align-content: center;
+        text-align: center;
+    }
+
+    .board-box {
+        border: 1px solid #c3c3c3;
+        margin: 2px;
+    }
+
+    .content-title {
+        width: 50%;
+        padding: 10px;
+    }
+
+    .content-input {
+        width: 50%;
+        padding: 10px;
+    }
+    .btn-form {
+        width : 100%;
+        margin : 10px;
+    }
+</style>
+
+</html>
