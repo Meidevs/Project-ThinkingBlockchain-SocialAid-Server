@@ -61,9 +61,9 @@ class Rewards {
                         }
                         await myConnection.query('UPDATE ts_groups SET status = 2 WHERE groupsid = ?', [list[i].groupsid]);
                     }
-
+		    resolve(true);
                 } catch (err) {
-                    console.log(err)
+                    reject(err)
                 }
             }
         )

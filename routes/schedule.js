@@ -115,7 +115,6 @@ cron.schedule("00 00 * * *", async () => {
     console.log('aDateString', aDateString);
 
     var Groups_List_status_0 = await groupModel.GetAllStatusOn();
-    console.log('Groups_List_status_0', Groups_List_status_0)
 
     //Select Expired Group_List.
     var Select_Groups_List_On_Duedate = Groups_List_status_0.filter((duedateString) => {
@@ -125,7 +124,7 @@ cron.schedule("00 00 * * *", async () => {
 
     // Select_Groups_List_On_Duedate Variable is consist of Group Information. (Groupsid, user_seq, stc, period, etc)
     var All_Of_Participants = await groupModel.SelectAllParticipants();
-    console.log('All_Of_Participants', All_Of_Participants);
+    
     Select_Groups_List_On_Duedate.map((data) => {
       for (var i = 0; i < All_Of_Participants.length; i++) {
         if (data.groupsid == All_Of_Participants[i].groupsid) {

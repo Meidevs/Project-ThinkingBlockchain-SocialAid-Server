@@ -98,7 +98,7 @@ router.post('/creategroup', async (req, res) => {
             flags: 2,
             message: '계모임 생성에 실패하였습니다'
         }
-        if (total <= json.data.currentCash) {
+        if (total <= json.data.balance) {
             var now = new Date();
             var year = now.getFullYear();
             var month = now.getMonth();
@@ -275,8 +275,8 @@ router.post('/cancelgroup', async (req, res) => {
                 body: JSON.stringify(walletList)
             })
             let json = await resAPI.json();
+	    console.log('cancel join', json);
             if (json.result == true) {
-                console.log('cancelgroup', json);
                 resResult = true;
                 //After Getting Unlock Process is Complete, Server will Ask Database to Change Status of Groups Table & Remove the Tuple From Participants Table .
                 await groupModel.ChangeStatusDeprecated(groupsid);
@@ -357,7 +357,7 @@ router.post('/joingroup', async (req, res) => {
                 body: JSON.stringify({ type: 'stc', address: wallet, pin: pin })
             })
             let json = await resAPI.json();
-            console.log('Able Balance : ', json.data.currentCash)
+            console.log('Able Balance : ', json.data.balance)
             if (json.result == true) {
                 // Check Balnace Complete.
                 // Put variable groupsid Into Array & Create dateString
@@ -390,7 +390,7 @@ router.post('/joingroup', async (req, res) => {
                     flags: 1,
                     message: '잔액이 부족합니다'
                 }
-                if (total <= json.data.currentCash) {
+                if (total <= json.data.balance) {
                     let lockAPI = await fetch('http://api.santavision.net:8500/lock', {
                         method: 'POST',
                         headers: {
@@ -402,7 +402,6 @@ router.post('/joingroup', async (req, res) => {
                     var lockJson = await lockAPI.json();
                     if (lockJson.result == true) {
                         var count = await groupModel.ParticipantInGroup(groupsid, userid, totalParticipants);
-                        resResulta = true;
                         resResult = {
                             flags: 2,
                             message: '계모임에 참가하셨습니다'
@@ -438,7 +437,7 @@ router.post('/joingroup', async (req, res) => {
                                     },
                                     body: JSON.stringify(walletList)
                                 })
-                                resResulta = true;
+                                
                                 var lockaJson = await locka.json();
                                 console.log(lockaJson);
                                 if (lockaJson.result == true) {
@@ -453,7 +452,6 @@ router.post('/joingroup', async (req, res) => {
         res.status(200).send(resResult);
     } catch (err) {
         console.log(err)
-        res.status(500).send(err)
     }
 });
 

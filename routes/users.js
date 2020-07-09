@@ -63,6 +63,9 @@ router.get('/myinfo', async (req, res) => {
     var pin = req.session.user.pin;
     var name = req.session.user.name;
     var joinArray = new Array();
+    console.log('wallet', wallet);
+    console.log('pin', pin);
+
     // Get ableBalance From Santa API,
     var resAPI = await fetch('http://api.santavision.net:8500/check/balance', {
        method: 'POST',
@@ -81,7 +84,7 @@ router.get('/myinfo', async (req, res) => {
         }
 
         if (joinArray[0] == undefined) {
-	  var ableSTC = json.data.currentCash;
+	  var ableSTC = json.data.balance;
 	  var totalSTC = req.session.user.currentCash;
           dataSet = {
             wallet: wallet,
@@ -99,7 +102,7 @@ router.get('/myinfo', async (req, res) => {
             return (preValue + currentValue)
           });
 
-          var ableSTC = json.data.currentCash;
+          var ableSTC = json.data.balance;
           var totalSTC = req.session.user.currentCash;
           dataSet = {
             wallet: wallet,
