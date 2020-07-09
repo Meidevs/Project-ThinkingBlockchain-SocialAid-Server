@@ -30,23 +30,19 @@ router.get('/instanceaction', async (req, res) => {
 //        if (ujson.result == true) {
 //            console.log('Unlock request Complete : ', ujson)
 //        }
-//	var resAPI = await fetch('http://api.santavision.net:8500/check/balance', {
-//           method: 'POST',
-//            headers: {
-//                'Content-Type': 'application/json',
-//            },
-//            body: JSON.stringify({ type: 'stc', address: 'SYrmBaXMCkWBBfruKS3iWVC4rAnqoejSer', pin: 1004 })
-//        })
-//        let json = await resAPI.json();
-//        console.log('Able Balance : ', json)
-//	res.status(200).send(json);
-        //        var ujson = await unlockAPI.json();
-        //        console.log('ujson', ujson)
-        //        if (ujson.result == true) {
-        //            console.log('Unlock request Complete : ', ujson)
-        //        }
-        // var dateString = await functions.DateCreator();
-        // console.log('dateString', dateString)
+	var resAPI = await fetch('http://api.santavision.net:8500/check/balance', {
+           method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ type: 'stc', address: 'SPq6SsMAUnEDRah6tLkum1rZc77qxHBYxc', pin: 5813 })
+        })
+        let json = await resAPI.json();
+        console.log('Able Balance : ', json);
+        if (json.result == true) {
+           console.log('', json)
+        }
+	res.status(200).send(json);
     } catch (err) {
         console.log(err)
     }

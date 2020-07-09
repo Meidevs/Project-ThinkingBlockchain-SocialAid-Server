@@ -8,12 +8,14 @@ var functions = require('../public/javascripts/functions/functions.js');
 
 cron.schedule("00 00 * * *", async () => {
   try {
+	
     var returnArray = new Array();
     var apiArray = new Array();
     var listArray = new Array();
     var rewardsArray = new Array();
     var rawObj = new Object();
     var dateString = await functions.DateCreator();
+    console.log('-------------------------------------' + dateString + '-----------------------------------------');
     var resUG = await groupModel.GetParticipantsUserGroups(dateString);
     var unlockAPI = await fetch('http://api.santavision.net:8500/unlock', {
       method: 'POST',
@@ -129,7 +131,7 @@ cron.schedule("00 00 * * *", async () => {
       for (var i = 0; i < All_Of_Participants.length; i++) {
         if (data.groupsid == All_Of_Participants[i].groupsid) {
           var rawObja = new Object();
-          rawObja.coinWalletAddress = All_Of_Participants[i].user_seq;
+          rawObja.coinWalletAddress = All_Of_Participants[i].userid;
           rawObja.amount = parseInt(data.period) * parseInt(data.stc);
           rawObja.endDate = aDateString;
           Array_Before_UserWallet.push(rawObja);
