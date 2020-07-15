@@ -265,6 +265,7 @@ class Groups {
                         groupname: null,
                         stc: null,
                         period: null,
+                        date : null
                     }
 
                     var resReturn = await this.GetAllStatusOn();
@@ -278,6 +279,7 @@ class Groups {
                             rawObj.story = resultStory,
                             rawObj.stc = resReturn[i].stc,
                             rawObj.period = resReturn[i].period,
+                            rawObj.date = resReturn[i].date,
 
                             rawArray.push(JSON.parse(JSON.stringify(rawObj)))
                     }
