@@ -238,6 +238,7 @@ router.post('/loadgroup', async (req, res) => {
             cates: resReturn[0].cates,
             story: resReturn[0].story,
             groupname: resReturn[0].groupname,
+            date: resReturn[0].date,
             stc: resReturn[0].stc,
             tstc: (parseInt(resReturn[0].stc) * parseInt(resReturn[0].period)),
             period: resReturn[0].period,

@@ -111,7 +111,6 @@ class Groups {
                         rawObj.period = resReturn[0].period;
                         rawObj.date = resReturn[0].date;
                         rawObj.status = resReturn[0].status;
-
                         rawArray.push(JSON.parse(JSON.stringify(rawObj)))
                     }
 
