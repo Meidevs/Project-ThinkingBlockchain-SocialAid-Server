@@ -22,6 +22,28 @@ class Functions {
             }
         )
     }
+
+    DateCreator () {
+        return new Promise (
+            async (resolve, reject) => {
+                try {
+                    var date = new Date();
+                    var a = date.getMonth() + 1;
+                    if(JSON.stringify(a).length != 2) {
+                        var monthCode = '0' + a;
+                    } else {
+                        var monthCode = JSON.stringify(a)
+                    }
+                    var yearCode = JSON.stringify(date.getFullYear());
+                    var returnData = yearCode + monthCode;
+                    resolve(returnData)
+                } catch (err) {
+                    console.log(err)
+                    reject(err)
+                }
+            }
+        )
+    }
 }
 
 

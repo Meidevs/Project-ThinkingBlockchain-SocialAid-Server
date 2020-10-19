@@ -26,10 +26,14 @@ router.post('/register', async (req, res, next) => {
     // Put Request to Santa Wallet API
 
     dataSet.wallet = 'W23iA2jSuAODhjWusJShbXmSI81KSapOsXY35'
-    await userModel.Register(dataSet)
+    var resResult = await userModel.Register(dataSet);
+
+    // Paste Here, Storing User data to Session Process
+
     res.status(200).send(true)
   } catch (err) {
-
+    console.log(err)
+    res.status(500).send(false)
   }
 });
 
