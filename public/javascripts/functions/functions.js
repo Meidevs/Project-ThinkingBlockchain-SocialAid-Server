@@ -107,11 +107,20 @@ class Functions {
                 try {
                     var rawArray = new Array();
                     var cnt = 0;
+                    // SearchBox puts a filter parameter in a loop to find the number of parameters fetched from the Front-End;
+                    // cnt is  0 - 3;
                     for (var key in filter) {
                         if (filter[key] != null) {
                             cnt += 1;
                         }
                     }
+                    // cnt : 3 means that user has sent all parameters to the End-point;
+                    // cnt : 2 means that user has sent 2 out of 3 to the End-point;
+                    // When cnt is 2, the SearchBox function looks for parameters that aren't sent to the End-point;
+                    // cnt : 1 means that user has sent 1 out of 3 to the End-point;
+                    // When cnt is 1, the SearchBox function looks for parameters that aren't sent to the End-point, too;
+                    // Finally, the SearchBox function uses filter function to find the items that match the filter's parameter;
+                    // And, stores into the rawArray and returns it;
                     switch (cnt) {
                         case 3:
                             data.filter(item => {

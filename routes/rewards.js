@@ -7,11 +7,12 @@ var rewardsModel = require('../public/javascripts/components/rewardModel.js');
 var functions = require('../public/javascripts/functions/functions.js');
 
 router.get('/groupstatus', async (req, res) => {
+    // The groupstatus API is for sending the current user status;
+    // It sends user's total STC, revenue, balance, profit, repayment, endgaged group count and monthly, yearly total stc;
     try {
         var groupsidList = new Array();
         var rawArray = new Array();
         var dataSet = new Object();
-        // Transfer Total STC, Revenue, Balance, Profit, Repayment, Groups Count, Total STC Annually & Monthly
         dataSet = {
             totalSTC: 0,
             revenue: 0,
@@ -24,15 +25,17 @@ router.get('/groupstatus', async (req, res) => {
         }
         var userid = req.session.user.userid;
 
-        // Extract groupsid List Using Userid Which Stored in Session Storage.
+        // The GetAllJoinedList function returns a list of groups the user has joined;
+        // Then, loop function only collects the groupsid;
         var list = await groupModel.GetAllJoinedList(userid);
         for (var i = 0; i < list.length; i++) {
             groupsidList.push(list[i].groupsid);
         }
-        if (groupsidList[0] == null) {
-	    var now = new Date();
-            var yearArray = new Array();
 
+        if (groupsidList[0] == null) {
+            var now = new Date();
+            var yearArray = new Array();
+            // If groupsidList is null, the loop function sets three year later and three year ago based on the current year;
             var nowYear = now.getFullYear();
             for (var i = nowYear - 3; i <= nowYear + 3; i++) {
                 var insObj = new Object();
@@ -41,6 +44,8 @@ router.get('/groupstatus', async (req, res) => {
                 yearArray.push(insObj);
 
             }
+
+            // The loop function sets the month and initial data as a zero every year;
             for (var i = 0; i < yearArray.length; i++) {
                 var rawArray = [];
 
@@ -49,7 +54,7 @@ router.get('/groupstatus', async (req, res) => {
                 }
                 yearArray[i].month = rawArray
             }
-
+            // YearCalaulator and MonthCalculator function puts initial data;
             var annually = await functions.YearCalculator(yearArray);
             var monthly = await functions.MonthCalculator(yearArray);
 
@@ -61,21 +66,26 @@ router.get('/groupstatus', async (req, res) => {
             dataSet.annually = annually;
             dataSet.monthly = monthly;
         } else {
-            // Get All of STC From Groups Table & Sum All of STC.
+            // The GetAllSTC function gets all STCs from a list of groups;
             var stcReturn = await rewardsModel.GetAllSTC(groupsidList);
+
+            // This reduce function calculates total STC;
             var stcSum = stcReturn.reduce(function (preValue, currentValue) {
                 return (preValue + currentValue)
             });
-            // Get All of Revenue From Groups Table & Calculate Revenue.
+            // The GetAllRevenue function gets all revenues from a list of groups;
             var revReturn = await rewardsModel.GetAllRevenue(groupsidList, userid);
+
+            // This reduce function calculates total revenue;
             var revSum = revReturn.reduce(function (preValue, currentValue) {
                 return (preValue + currentValue)
             });
 
             // Get Balance From Santa Wallet
 
-            // Get Profit Of Period From Rewards Table.
+            //The GetAllProfit function gets all profits from a list of groups;
             var reProfit = await rewardsModel.GetAllProfit(userid)
+            // This reduce function calculates total profit;
             if (reProfit[0] != undefined) {
                 var repSum = reProfit.reduce(function (preValue, currentValue) {
                     return (preValue + currentValue)
@@ -84,9 +94,9 @@ router.get('/groupstatus', async (req, res) => {
                 var repSum = 0;
             }
 
-
-            // Get Repayment From Groups Table.
-            var repReturn = await rewardsModel.GetAllRepayment(groupsidList)
+            //The GetAllRepayment function gets all repayments from a list of groups;
+            var repReturn = await rewardsModel.GetAllRepayment(groupsidList);
+            // This reduce function calculates total repayments;
             if (repReturn[0] != undefined) {
                 var repaSum = repReturn.reduce(function (preValue, currentValue) {
                     return (preValue + currentValue)
@@ -95,7 +105,7 @@ router.get('/groupstatus', async (req, res) => {
                 var repaSum = 0;
             }
 
-            // Get Groups Count From Participants Table.
+            // The GetAllJoinedList function calls the numbers of joined groups;
             var cntReturn = await groupModel.GetAllJoinedList(userid);
             cnt = cntReturn.length;
 
@@ -107,18 +117,24 @@ router.get('/groupstatus', async (req, res) => {
             //         total : data
             //     ]
             // }
+            // The DateRewards function calls a list of rewards based on year and month;
             var mReturn = await rewardsModel.DateRewards(userid);
 
             // Extract Years From mReturn Variables, Push Years to raw Array.
             // Remove Duplicates Variables in rawArray using filter Function.
+
+            // The loop function gets yaers from mReturn variable and pushes years to rawArray;
             for (var i = 0; i < mReturn.length; i++) {
                 rawArray.push(mReturn[i].annually);
             }
+
+            // Then, the filter function removes the duplicates from the rawArray;
             var rawArray = rawArray.filter((item, index) => rawArray.indexOf(item) == index);
 
             var now = new Date();
             var yearArray = new Array();
 
+            // The loop function sets the month and initial data as a zero every year;
             var nowYear = now.getFullYear();
             for (var i = nowYear - 3; i <= nowYear + 3; i++) {
                 var insObj = new Object();
@@ -135,7 +151,7 @@ router.get('/groupstatus', async (req, res) => {
                 }
                 yearArray[i].month = rawArray
             }
-      	    
+            // Based on mReturn value, map function saves monthly, yearly datas to the mReturn;
             yearArray.map((data) => {
                 for (var i = 0; i < mReturn.length; i++) {
                     if (data.year == mReturn[i].annually) {
@@ -146,7 +162,8 @@ router.get('/groupstatus', async (req, res) => {
                         }
                     }
                 }
-            })
+            });
+            // YearCalaulator and MonthCalculator function puts initial data;
             var annually = await functions.YearCalculator(yearArray);
             var monthly = await functions.MonthCalculator(yearArray);
 
@@ -168,16 +185,19 @@ router.get('/groupstatus', async (req, res) => {
 
 router.get('/groupstatus/detail/:id', async (req, res) => {
     try {
+        // req.params is one of "waiting", "ongoing", "done";
         var params = req.params;
         var userid = req.session.user.userid;
         var dataSet = new Object();
         var joinArray = new Array();
+
+        // The GetAllJoinedList function calls the numbers of joined groups;
         var list = await groupModel.GetAllJoinedList(userid);
-        // Extract Only Groupsid From participants Table Using GetAllJoinedList Function.
+        // The loop function gets groupsid from the list which is the return value of the GetAllJoinedList function;
         for (var i = 0; i < list.length; i++) {
             joinArray.push(list[i].groupsid)
         }
-        // Get Groupsid Which created by Self
+        // The GetHostGroupList function calls a list of groups it has created;
         var hostArray = await groupModel.GetHostGroupList(list);
 
         for (var i = 0; i < hostArray.length; i++) {
@@ -193,6 +213,7 @@ router.get('/groupstatus/detail/:id', async (req, res) => {
             host: [],
             join: [],
         }
+        // The if statement seperates "waiting", "ongoing", "done",and inner statement seperates groups created by self or someone else; 
         if (params.id == 'waiting') {
             var insArray_1 = new Array();
             var insArray_2 = new Array();
@@ -256,42 +277,49 @@ router.get('/groupstatus/detail/:id', async (req, res) => {
 });
 
 router.post('/getdetaildatas', async (req, res) => {
-	try {
-	var userid = req.session.user.userid;
-	var groupsid = req.body.groupsid;
-	var rawObj = new Object();	
-	var creator;
-	// Get All Group Datas From Group Model Module.
-	var resReturn = await groupModel.GetGroupdatas([groupsid]);
-	var resDueDate = await groupModel.GetDueDate(groupsid);
-	var resRateDate = await groupModel.GetRateDate(userid, groupsid);
-	var createdate = resReturn[0].date.substring(0,4) + '-' + resReturn[0].date.substring(4,6) + '-' + resReturn[0].date.substring(6,8);
-	var duedate = resDueDate.toISOString().substring(0,10);
-	var ratedate = resRateDate.toISOString().substring(0,10);
-	if (userid == resReturn[0].userid) {
-	creator = 1;
-	} else {
-	creator = 0;
-	}
-	rawObj = {
-		groupsid : resReturn[0].groupsid,
-		userid : resReturn[0].userid,
-		host : resReturn[0].host,
-		groupname : resReturn[0].groupname,
-		stc : resReturn[0].stc,
-		period : resReturn[0].period,
-		createdate : createdate,
-		status : resReturn[0].status,
-		duedate : duedate,
-		ratedate : ratedate,
-		creator : creator,
-	}
-	res.status(200).send(rawObj);
+    try {
 
-	}
-	catch (err) {
-	res.status(500).send(err);
-	}
+        // getdetaildatas API gets userid from user session storage and groupsid from Front-end;
+        var userid = req.session.user.userid;
+        var groupsid = req.body.groupsid;
+        var rawObj = new Object();
+        var creator;
+        // The GetGroupdatas function calls a details of group from the tb_group table;
+        // The GetDueDate function calls a deadline of group from the tb_participants table;
+        // The GetRateDate function calls groups according to date order from the tb_participants table;
+        var resReturn = await groupModel.GetGroupdatas([groupsid]);
+        var resDueDate = await groupModel.GetDueDate(groupsid);
+        var resRateDate = await groupModel.GetRateDate(userid, groupsid);
+
+        // The createdata is the date of group was created;
+        var createdate = resReturn[0].date.substring(0, 4) + '-' + resReturn[0].date.substring(4, 6) + '-' + resReturn[0].date.substring(6, 8);
+        var duedate = resDueDate.toISOString().substring(0, 10);
+        var ratedate = resRateDate.toISOString().substring(0, 10);
+
+        // The if statement checks if the requesting user has created a group;
+        if (userid == resReturn[0].userid) {
+            creator = 1;
+        } else {
+            creator = 0;
+        }
+        rawObj = {
+            groupsid: resReturn[0].groupsid,
+            userid: resReturn[0].userid,
+            host: resReturn[0].host,
+            groupname: resReturn[0].groupname,
+            stc: resReturn[0].stc,
+            period: resReturn[0].period,
+            createdate: createdate,
+            status: resReturn[0].status,
+            duedate: duedate,
+            ratedate: ratedate,
+            creator: creator,
+        }
+        res.status(200).send(rawObj);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
 })
 
 module.exports = router;
